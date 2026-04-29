@@ -1,4 +1,27 @@
-﻿Module Module1
+﻿Imports System.Linq.Expressions
+
+Module Module1
+
+    Const NO_KEY = 0
+    Const CURSOR_LEFT = 1
+    Const CURSOR_RIGHT = 2
+    Const UNKNOWN_KEY = 99
+    Function Tastatur_Abfrage() As Integer
+        Dim cki As New ConsoleKeyInfo()
+        If Console.KeyAvailable = False Then
+            Return NO_KEY
+        Else
+            cki = Console.ReadKey(True)
+            If cki.Key = ConsoleKey.LeftArrow Then
+                Return CURSOR_LEFT
+            ElseIf cki.Key = ConsoleKey.RightArrow Then
+                Return CURSOR_RIGHT
+            Else
+                Return UNKNOWN_KEY
+            End If
+        End If
+    End Function
+
     Sub ZeilenErzeugung(ByRef Zeile() As Char)
 
         'Deklarieren der Variablen
@@ -42,7 +65,7 @@
                 If P + j - 1 <= 79 Then
 
                     'Hinderniss an Position P+j-1 in den Zeilenvektor eintragen
-                    Zeile(P + j - 1) = "X"
+                    Zeile(P + j - 1) = "x"
 
                 End If
 
@@ -65,10 +88,13 @@
         Dim Zeile(79) As Char
         Dim z As Integer
         Dim s As Integer
+        Dim Taste As Integer
+        Dim SpielfigurPos As Integer
+        Dim i As Integer
 
         'Startwerte setzen
         leben = 5
-
+        SpielfigurPos = 40
 
         'Hauptschleife des Spiels
         Do
@@ -92,26 +118,72 @@
 
             'Spielfeld auf der Konsole ausgeben
             Console.SetCursorPosition(0, 0)
-            For z = 0 To 24
+            For z = 0 To 22
                 For s = 0 To 79
                     Console.Write(spielfeld(z, s))
                 Next
                 Console.WriteLine()
             Next
 
-            'Warten
-            Threading.Thread.Sleep(1000)
+            For i = 1 To 10
+
+                'Tastatur abfragen
+                Taste = Tastatur_Abfrage()
+                'Console.WriteLine("Taste: " & Taste)
+
+                'Spielfigur an alter Position löschen
+                Console.SetCursorPosition(SpielfigurPos, 23)
+                Console.Write(" ")
+
+                'Position der Spielfigur ermitteln
+                If Taste = CURSOR_LEFT Then
+                    SpielfigurPos -= 1
+                End If
+
+                If Taste = CURSOR_RIGHT Then
+                    SpielfigurPos += 1
+                End If
+
+                'Begrenzung der Spielfigur auf dem Spielfeld
+                If SpielfigurPos < 0 Then
+                    SpielfigurPos = 0
+                End If
+
+                If SpielfigurPos > 79 Then
+                    SpielfigurPos = 79
+                End If
+
+
+
+                'Kollisionserkennung
+
+                'Spielfigur auf der Konsole ausgeben
+                Console.SetCursorPosition(SpielfigurPos, 23)
+                Console.Write("O")
+
+                'Warten
+                Threading.Thread.Sleep(200 / 10)
+            Next
+            'Tastaturpuffer leeren
+            Do
+                Taste = Tastatur_Abfrage()
+            Loop Until Taste = NO_KEY
+
+
+
         Loop Until leben = 0
 
 
     End Sub
 
+
     Sub Main()
+        Console.CursorVisible = False
 
         Spielablauf()
+
+
 
     End Sub
 
 End Module
-
-'Test Push und commit
