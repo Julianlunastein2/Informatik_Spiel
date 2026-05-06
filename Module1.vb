@@ -8,13 +8,13 @@ Module Module1
     Const UNKNOWN_KEY = 99
     Const SPALTE_MAX = 79
     Const ZEILE_MAX = 24
-    Const A_Min = 1
-    Const A_Max_Start = 2
-    Const G_Min = 1
+    Const A_MIN = 1
+    Const A_MAX_START = 2
+    Const G_MIN = 1
     Const G_Max = 9
-    Const P_Min = 0
-    Const P_Max = 79
-    Const Spielfigur = 10
+    Const P_MIN = 0
+    Const P_MAX = 79
+    Const SPIELFIGUR = 10
 
     Function Tastatur_Abfrage() As Integer
         Dim cki As New ConsoleKeyInfo()
@@ -51,7 +51,7 @@ Module Module1
         Randomize()
         X = VBMath.Rnd
 
-        A = (a_max - A_Min) * X + 1
+        A = (a_max - A_MIN) * X + 1
         'Console.WriteLine(A)
 
         'Für jeden der A Hindernisblocks:
@@ -61,14 +61,14 @@ Module Module1
             Randomize()
             X = VBMath.Rnd
 
-            G = (G_Max - G_Min) * X + 1
+            G = (G_Max - G_MIN) * X + 1
             'console.WriteLine("G: " & G)
 
             'Startposition P des Hindernisblocks zufällig ermitteln
             Randomize()
             X = VBMath.Rnd
 
-            P = (SPALTE_MAX - P_Min) * X + 0
+            P = (SPALTE_MAX - P_MIN) * X + 0
             'Console.WriteLine("P: " & P)
 
             'Für jedes der G Einzelhindernisse:
@@ -93,6 +93,29 @@ Module Module1
         'Console.WriteLine()
 
 
+    End Sub
+
+    Sub Gameover()
+        Console.BackgroundColor = ConsoleColor.Red
+        Console.ForegroundColor = ConsoleColor.White
+        Console.Clear()
+        'Game over Screen
+        Console.WriteLine("
+
+
+
+              ▄████  ▄▄▄       ███▄ ▄███▓▓█████     ▒█████   ██▒   █▓▓█████  ██▀███  
+             ██▒ ▀█▒▒████▄    ▓██▒▀█▀ ██▒▓█   ▀    ▒██▒  ██▒▓██░   █▒▓█   ▀ ▓██ ▒ ██▒
+            ▒██░▄▄▄░▒██  ▀█▄  ▓██    ▓██░▒███      ▒██░  ██▒ ▓██  █▒░▒███   ▓██ ░▄█ ▒
+            ░▓█  ██▓░██▄▄▄▄██ ▒██    ▒██ ▒▓█  ▄    ▒██   ██░  ▒██ █░░▒▓█  ▄ ▒██▀▀█▄  
+            ░▒▓███▀▒ ▓█   ▓██▒▒██▒   ░██▒░▒████▒   ░ ████▓▒░   ▒▀█░  ░▒████▒░██▓ ▒██▒
+             ░▒   ▒  ▒▒   ▓▒█░░ ▒░   ░  ░░░ ▒░ ░   ░ ▒░▒░▒░    ░ ▐░  ░░ ▒░ ░░ ▒▓ ░▒▓░
+              ░   ░   ▒   ▒▒ ░░  ░      ░ ░ ░  ░     ░ ▒ ▒░    ░ ░░   ░ ░  ░  ░▒ ░ ▒░
+            ░ ░   ░   ░   ▒   ░      ░      ░      ░ ░ ░ ▒       ░░     ░     ░░   ░ 
+                  ░       ░  ░       ░      ░  ░       ░ ░        ░     ░  ░   ░     
+                                                                 ░                   
+")
+        Console.ReadLine()
     End Sub
 
     Sub Spielablauf()
@@ -142,7 +165,7 @@ Module Module1
                 Console.WriteLine()
             Next
 
-            For i = 1 To Spielfigur
+            For i = 1 To SPIELFIGUR
 
                 'Tastatur abfragen
                 Taste = Tastatur_Abfrage()
@@ -191,7 +214,7 @@ Module Module1
 
 
                 'Warten
-                Threading.Thread.Sleep(Wartezeit / Spielfigur)
+                Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
 
             Next
             'Tastaturpuffer leeren
@@ -215,26 +238,7 @@ Module Module1
 
         Loop Until leben <= 0
 
-        Console.BackgroundColor = ConsoleColor.Red
-        Console.ForegroundColor = ConsoleColor.White
-        Console.Clear()
-        'Game over Screen
-        Console.WriteLine("
-
-
-
-              ▄████  ▄▄▄       ███▄ ▄███▓▓█████     ▒█████   ██▒   █▓▓█████  ██▀███  
-             ██▒ ▀█▒▒████▄    ▓██▒▀█▀ ██▒▓█   ▀    ▒██▒  ██▒▓██░   █▒▓█   ▀ ▓██ ▒ ██▒
-            ▒██░▄▄▄░▒██  ▀█▄  ▓██    ▓██░▒███      ▒██░  ██▒ ▓██  █▒░▒███   ▓██ ░▄█ ▒
-            ░▓█  ██▓░██▄▄▄▄██ ▒██    ▒██ ▒▓█  ▄    ▒██   ██░  ▒██ █░░▒▓█  ▄ ▒██▀▀█▄  
-            ░▒▓███▀▒ ▓█   ▓██▒▒██▒   ░██▒░▒████▒   ░ ████▓▒░   ▒▀█░  ░▒████▒░██▓ ▒██▒
-             ░▒   ▒  ▒▒   ▓▒█░░ ▒░   ░  ░░░ ▒░ ░   ░ ▒░▒░▒░    ░ ▐░  ░░ ▒░ ░░ ▒▓ ░▒▓░
-              ░   ░   ▒   ▒▒ ░░  ░      ░ ░ ░  ░     ░ ▒ ▒░    ░ ░░   ░ ░  ░  ░▒ ░ ▒░
-            ░ ░   ░   ░   ▒   ░      ░      ░      ░ ░ ░ ▒       ░░     ░     ░░   ░ 
-                  ░       ░  ░       ░      ░  ░       ░ ░        ░     ░  ░   ░     
-                                                                 ░                   
-")
-        Console.ReadLine()
+        Gameover()
 
 
 
