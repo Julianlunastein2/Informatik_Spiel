@@ -22,7 +22,7 @@ Module Module1
         End If
     End Function
 
-    Sub ZeilenErzeugung(ByRef Zeile() As Char)
+    Sub ZeilenErzeugung(ByRef Zeile() As Char, ByVal a_max As Integer)
 
         'Deklarieren der Variablen
         Dim A As Integer    'Anzahl der Hindernisblocks
@@ -37,22 +37,25 @@ Module Module1
             Zeile(i) = " "
         Next
 
-        'Anzahl A der HIndernisblocks zufällig ermitteln
+        'Anzahl A der Hindernisblocks zufällig ermitteln
+        Randomize()
         X = VBMath.Rnd
 
-        A = (5 - 1) * X + 1
+        A = (a_max - 1) * X + 1
         'Console.WriteLine(A)
 
         'Für jeden der A Hindernisblocks:
         For i = 1 To A
 
             'Größe G des Hindernisblocks zufällig ermitteln
+            Randomize()
             X = VBMath.Rnd
 
             G = (9 - 1) * X + 1
             'console.WriteLine("G: " & G)
 
             'Startposition P des Hindernisblocks zufällig ermitteln
+            Randomize()
             X = VBMath.Rnd
 
             P = (79 - 0) * X + 0
@@ -91,15 +94,19 @@ Module Module1
         Dim Taste As Integer
         Dim SpielfigurPos As Integer
         Dim i As Integer
+        Dim Wartezeit As Integer
+        Dim a_max As Single
 
         'Startwerte setzen
         leben = 5
         SpielfigurPos = 40
+        Wartezeit = 200
+        a_max = 2
 
         'Hauptschleife des Spiels
         Do
             'neue Zeile erzeugen
-            ZeilenErzeugung(Zeile)
+            ZeilenErzeugung(Zeile, a_max)
 
             'Alle Zeilen des Spielfelds um eine Zeile nach unten verschieben
             'Rückwärtschleife über zeilen
@@ -153,25 +160,72 @@ Module Module1
                     SpielfigurPos = 79
                 End If
 
-
-
                 'Kollisionserkennung
+                If spielfeld(22, SpielfigurPos) = "x" Then
+                    leben -= 1
+                    Console.Beep()
+
+                    'Hinderniss entfernen
+                    spielfeld(22, SpielfigurPos) = " "
+                End If
+
 
                 'Spielfigur auf der Konsole ausgeben
                 Console.SetCursorPosition(SpielfigurPos, 23)
                 Console.Write("O")
 
+                'Anzeige der Leben
+                Console.SetCursorPosition(0, 24)
+                Console.Write("Leben: " & leben)
+
+
+
                 'Warten
-                Threading.Thread.Sleep(200 / 10)
+                Threading.Thread.Sleep(Wartezeit / 10)
+
             Next
             'Tastaturpuffer leeren
             Do
                 Taste = Tastatur_Abfrage()
             Loop Until Taste = NO_KEY
 
+            'Wartezeit verkürzen
+            If Wartezeit > 50 Then
+                Wartezeit = Wartezeit * 0.99
+            End If
+            'Console.SetCursorPosition(15, 24)
+            'Console.Write("Wartezeit: " & Wartezeit)
+
+            'Hindernissdichte erhöhen
+            If a_max < 10 Then
+                a_max = a_max * 1.01
+            End If
 
 
-        Loop Until leben = 0
+
+        Loop Until leben <= 0
+
+        Console.BackgroundColor = ConsoleColor.Red
+        Console.ForegroundColor = ConsoleColor.White
+        Console.Clear()
+        'Game over Screen
+        Console.WriteLine("
+
+
+
+              ▄████  ▄▄▄       ███▄ ▄███▓▓█████     ▒█████   ██▒   █▓▓█████  ██▀███  
+             ██▒ ▀█▒▒████▄    ▓██▒▀█▀ ██▒▓█   ▀    ▒██▒  ██▒▓██░   █▒▓█   ▀ ▓██ ▒ ██▒
+            ▒██░▄▄▄░▒██  ▀█▄  ▓██    ▓██░▒███      ▒██░  ██▒ ▓██  █▒░▒███   ▓██ ░▄█ ▒
+            ░▓█  ██▓░██▄▄▄▄██ ▒██    ▒██ ▒▓█  ▄    ▒██   ██░  ▒██ █░░▒▓█  ▄ ▒██▀▀█▄  
+            ░▒▓███▀▒ ▓█   ▓██▒▒██▒   ░██▒░▒████▒   ░ ████▓▒░   ▒▀█░  ░▒████▒░██▓ ▒██▒
+             ░▒   ▒  ▒▒   ▓▒█░░ ▒░   ░  ░░░ ▒░ ░   ░ ▒░▒░▒░    ░ ▐░  ░░ ▒░ ░░ ▒▓ ░▒▓░
+              ░   ░   ▒   ▒▒ ░░  ░      ░ ░ ░  ░     ░ ▒ ▒░    ░ ░░   ░ ░  ░  ░▒ ░ ▒░
+            ░ ░   ░   ░   ▒   ░      ░      ░      ░ ░ ░ ▒       ░░     ░     ░░   ░ 
+                  ░       ░  ░       ░      ░  ░       ░ ░        ░     ░  ░   ░     
+                                                                 ░                   
+")
+        Console.ReadLine()
+
 
 
     End Sub
