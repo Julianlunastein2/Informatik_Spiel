@@ -6,6 +6,16 @@ Module Module1
     Const CURSOR_LEFT = 1
     Const CURSOR_RIGHT = 2
     Const UNKNOWN_KEY = 99
+    Const SPALTE_MAX = 79
+    Const ZEILE_MAX = 24
+    Const A_Min = 1
+    Const A_Max_Start = 2
+    Const G_Min = 1
+    Const G_Max = 9
+    Const P_Min = 0
+    Const P_Max = 79
+    Const Spielfigur = 10
+
     Function Tastatur_Abfrage() As Integer
         Dim cki As New ConsoleKeyInfo()
         If Console.KeyAvailable = False Then
@@ -33,7 +43,7 @@ Module Module1
 
 
         'Zeilenvektor mit Leerzeichen füllen
-        For i = 0 To 79
+        For i = 0 To SPALTE_MAX
             Zeile(i) = " "
         Next
 
@@ -41,7 +51,7 @@ Module Module1
         Randomize()
         X = VBMath.Rnd
 
-        A = (a_max - 1) * X + 1
+        A = (a_max - A_Min) * X + 1
         'Console.WriteLine(A)
 
         'Für jeden der A Hindernisblocks:
@@ -51,21 +61,21 @@ Module Module1
             Randomize()
             X = VBMath.Rnd
 
-            G = (9 - 1) * X + 1
+            G = (G_Max - G_Min) * X + 1
             'console.WriteLine("G: " & G)
 
             'Startposition P des Hindernisblocks zufällig ermitteln
             Randomize()
             X = VBMath.Rnd
 
-            P = (79 - 0) * X + 0
+            P = (SPALTE_MAX - P_Min) * X + 0
             'Console.WriteLine("P: " & P)
 
             'Für jedes der G Einzelhindernisse:
             For j = 1 To G
 
                 'Prüfen ob Hinderniss innerhalb des Wertebereichs ist
-                If P + j - 1 <= 79 Then
+                If P + j - 1 <= SPALTE_MAX Then
 
                     'Hinderniss an Position P+j-1 in den Zeilenvektor eintragen
                     Zeile(P + j - 1) = "x"
@@ -77,7 +87,7 @@ Module Module1
         Next
 
         ''Ausgabe zum Test
-        'For i = 0 To 79
+        'For i = 0 To SPALTE_MAX
         '    Console.Write(Zeile(i))
         'Next
         'Console.WriteLine()
@@ -87,8 +97,8 @@ Module Module1
 
     Sub Spielablauf()
         Dim leben As Integer
-        Dim spielfeld(24, 79) As Char
-        Dim Zeile(79) As Char
+        Dim spielfeld(ZEILE_MAX, SPALTE_MAX) As Char
+        Dim Zeile(SPALTE_MAX) As Char
         Dim z As Integer
         Dim s As Integer
         Dim Taste As Integer
@@ -99,9 +109,9 @@ Module Module1
 
         'Startwerte setzen
         leben = 5
-        SpielfigurPos = 40
+        SpielfigurPos = SPALTE_MAX / 2
         Wartezeit = 200
-        a_max = 2
+        a_max = A_Max_Start
 
         'Hauptschleife des Spiels
         Do
@@ -110,36 +120,36 @@ Module Module1
 
             'Alle Zeilen des Spielfelds um eine Zeile nach unten verschieben
             'Rückwärtschleife über zeilen
-            For z = 24 To 1 Step -1
+            For z = ZEILE_MAX To 1 Step -1
                 'Vorwärtschleife über Spalten
-                For s = 0 To 79
+                For s = 0 To SPALTE_MAX
                     'Eine Zelle nach unten kopieren
                     spielfeld(z, s) = spielfeld(z - 1, s)
 
                 Next
             Next
             'Neue Zeile am oberen Rand des Spielfelds einfügen
-            For s = 0 To 79
+            For s = 0 To SPALTE_MAX
                 spielfeld(0, s) = Zeile(s)
             Next
 
             'Spielfeld auf der Konsole ausgeben
             Console.SetCursorPosition(0, 0)
-            For z = 0 To 22
-                For s = 0 To 79
+            For z = 0 To ZEILE_MAX - 2
+                For s = 0 To SPALTE_MAX
                     Console.Write(spielfeld(z, s))
                 Next
                 Console.WriteLine()
             Next
 
-            For i = 1 To 10
+            For i = 1 To Spielfigur
 
                 'Tastatur abfragen
                 Taste = Tastatur_Abfrage()
                 'Console.WriteLine("Taste: " & Taste)
 
                 'Spielfigur an alter Position löschen
-                Console.SetCursorPosition(SpielfigurPos, 23)
+                Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - 1)
                 Console.Write(" ")
 
                 'Position der Spielfigur ermitteln
@@ -156,32 +166,32 @@ Module Module1
                     SpielfigurPos = 0
                 End If
 
-                If SpielfigurPos > 79 Then
-                    SpielfigurPos = 79
+                If SpielfigurPos > SPALTE_MAX Then
+                    SpielfigurPos = SPALTE_MAX
                 End If
 
                 'Kollisionserkennung
-                If spielfeld(22, SpielfigurPos) = "x" Then
+                If spielfeld(ZEILE_MAX - 2, SpielfigurPos) = "x" Then
                     leben -= 1
                     Console.Beep()
 
                     'Hinderniss entfernen
-                    spielfeld(22, SpielfigurPos) = " "
+                    spielfeld(ZEILE_MAX - 2, SpielfigurPos) = " "
                 End If
 
 
                 'Spielfigur auf der Konsole ausgeben
-                Console.SetCursorPosition(SpielfigurPos, 23)
+                Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - 1)
                 Console.Write("O")
 
                 'Anzeige der Leben
-                Console.SetCursorPosition(0, 24)
+                Console.SetCursorPosition(0, ZEILE_MAX)
                 Console.Write("Leben: " & leben)
 
 
 
                 'Warten
-                Threading.Thread.Sleep(Wartezeit / 10)
+                Threading.Thread.Sleep(Wartezeit / Spielfigur)
 
             Next
             'Tastaturpuffer leeren
@@ -193,7 +203,7 @@ Module Module1
             If Wartezeit > 50 Then
                 Wartezeit = Wartezeit * 0.99
             End If
-            'Console.SetCursorPosition(15, 24)
+            'Console.SetCursorPosition(15, ZEILE_MAX)
             'Console.Write("Wartezeit: " & Wartezeit)
 
             'Hindernissdichte erhöhen
