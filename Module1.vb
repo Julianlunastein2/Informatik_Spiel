@@ -51,7 +51,7 @@ Module Module1
         Randomize()
         X = VBMath.Rnd
 
-        A = (a_max - A_MIN) * X + 1
+        A = (a_max - A_MIN) * X + A_MIN
         'Console.WriteLine(A)
 
         'Für jeden der A Hindernisblocks:
@@ -61,14 +61,14 @@ Module Module1
             Randomize()
             X = VBMath.Rnd
 
-            G = (G_Max - G_MIN) * X + 1
+            G = (G_Max - G_MIN) * X + G_MIN
             'console.WriteLine("G: " & G)
 
             'Startposition P des Hindernisblocks zufällig ermitteln
             Randomize()
             X = VBMath.Rnd
 
-            P = (SPALTE_MAX - P_MIN) * X + 0
+            P = (SPALTE_MAX - P_MIN) * X + P_MIN
             'Console.WriteLine("P: " & P)
 
             'Für jedes der G Einzelhindernisse:
