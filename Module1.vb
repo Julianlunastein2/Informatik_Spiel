@@ -1,6 +1,4 @@
-﻿Imports System.Linq.Expressions
-
-Module Module1
+﻿Module Module1
 
     Const NO_KEY = 0
     Const CURSOR_LEFT = 1
@@ -10,12 +8,8 @@ Module Module1
     Const UNKNOWN_KEY = 99
     Const SPALTE_MAX = 79
     Const ZEILE_MAX = 24
-    Const A_MIN = 1
     Const A_MAX_START = 2
-    Const G_MIN = 1
-    Const G_Max = 9
-    Const P_MIN = 0
-    Const P_MAX = 79
+    ' frühere Konstanten für Hindernis-Generierung entfernt (nicht mehr verwendet)
     Const SPIELFIGUR = 10
 
     Function Tastatur_Abfrage() As Integer
@@ -40,19 +34,13 @@ Module Module1
 
     Sub ZeilenErzeugung(ByRef Zeile() As Char, ByVal a_max As Integer)
 
-        'Deklarieren der Variablen
-        Dim A As Integer    'Anzahl der Hindernisblocks
-        Dim X As Single
+        ' Laufvariable; alle alten Variablen für die alte Hinderniserzeugung entfernt
         Dim i As Integer
-        Dim G As Integer    'Größe des Hindernisblocks
-        Dim P As Integer    'Position des Hindernisblocks
 
-
-        'Zeilenvektor mit Leerzeichen füllen (keine "x" mehr)
+        ' Zeilenvektor mit Leerzeichen füllen (keine "x" mehr)
         For i = 0 To SPALTE_MAX
             Zeile(i) = " "c
         Next
-
 
     End Sub
 
@@ -261,25 +249,7 @@ Module Module1
                 If Links < 0 Then Links = 0
                 If Links > SPALTE_MAX - (FigurBreite - 1) Then Links = SPALTE_MAX - (FigurBreite - 1)
 
-                ' Kollision mit Hindernissen (verbleibende Logik, falls spaeter wieder genutzt)
-                For r As Integer = 0 To FigurHoehe - 1
-                    Dim consoleRow As Integer = SpielfigurObereZeile + r
-                    If consoleRow >= 0 AndAlso consoleRow <= ZEILE_MAX - 2 Then
-                        For c As Integer = 0 To FigurBreite - 1
-                            If FigurZeilen(r)(c) <> " "c Then
-                                Dim feldSpalte As Integer = Links + c
-                                If feldSpalte >= 0 AndAlso feldSpalte <= SPALTE_MAX Then
-                                    If spielfeld(consoleRow, feldSpalte) = "x"c Then
-                                        ' Falls zufaellig ein "x" auftaucht: Leben abziehen (Fallback)
-                                        leben -= 1
-                                        Console.Beep()
-                                        spielfeld(consoleRow, feldSpalte) = " "c
-                                    End If
-                                End If
-                            End If
-                        Next
-                    End If
-                Next
+                ' (Alte Hindernis-Kollisionslogik entfernt — es gibt keine "x" Hindernisse mehr)
 
                 ' Kollision mit Gegnern prüfen (genaue Sprite-Überlappung)
                 Dim SpielerObereZeile As Integer = SpielfigurObereZeile
