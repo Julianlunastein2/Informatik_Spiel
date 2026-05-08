@@ -5,12 +5,16 @@
     Const CURSOR_RIGHT = 2
     Const CURSOR_UP = 3
     Const CURSOR_DOWN = 4
+    Const CURSOR_ENTER = 5
     Const UNKNOWN_KEY = 99
     Const SPALTE_MAX = 79
     Const ZEILE_MAX = 24
     Const A_MAX_START = 2
     ' frühere Konstanten für Hindernis-Generierung entfernt (nicht mehr verwendet)
     Const SPIELFIGUR = 10
+    ' Spieler-Farbe (anpassbar im Startmenü)
+    Dim SpielerFG As ConsoleColor = ConsoleColor.Green
+
 
     Function Tastatur_Abfrage() As Integer
         Dim cki As New ConsoleKeyInfo()
@@ -26,6 +30,8 @@
                 Return CURSOR_UP
             ElseIf cki.Key = ConsoleKey.DownArrow Then
                 Return CURSOR_DOWN
+            ElseIf cki.Key = ConsoleKey.Enter Then
+                Return CURSOR_ENTER
             Else
                 Return UNKNOWN_KEY
             End If
@@ -67,6 +73,224 @@
         Console.ReadLine()
     End Sub
 
+    Sub SaveScore(ByVal punktzahl As Integer)
+        Try
+            Dim path As String = "scores.txt"
+            Dim scores As New System.Collections.Generic.List(Of Integer)
+            If System.IO.File.Exists(path) Then
+                For Each line In System.IO.File.ReadAllLines(path)
+                    Dim v As Integer
+                    If Integer.TryParse(line, v) Then scores.Add(v)
+                Next
+            End If
+            scores.Add(punktzahl)
+            scores.Sort()
+            scores.Reverse()
+            If scores.Count > 10 Then scores = scores.GetRange(0, 10)
+            Dim out As New System.Collections.Generic.List(Of String)
+            For Each v In scores
+                out.Add(v.ToString())
+            Next
+            System.IO.File.WriteAllLines(path, out.ToArray())
+        Catch ex As Exception
+            ' ignore save errors in this simple student project
+        End Try
+    End Sub
+
+    Sub ZeigeScoreboard()
+        Console.Clear()
+        Console.WriteLine("--- Scoreboard (Top 10) ---")
+        Dim path As String = "scores.txt"
+        If Not System.IO.File.Exists(path) Then
+            Console.WriteLine("Noch keine Scores vorhanden.")
+        Else
+            Dim lines = System.IO.File.ReadAllLines(path)
+            Dim idx As Integer = 1
+            For Each l In lines
+                Console.WriteLine(idx & ". " & l)
+                idx += 1
+                If idx > 10 Then Exit For
+            Next
+        End If
+        Console.WriteLine()
+        Console.WriteLine("Drücke eine Taste, um zurückzugehen...")
+        Console.ReadKey(True)
+    End Sub
+
+    Sub FarbenAnpassen()
+        Dim cols = System.Enum.GetValues(GetType(ConsoleColor))
+        Console.Clear()
+        Console.WriteLine("Wähle Vordergrundfarbe für dein Auto (Index eingeben):")
+        For i As Integer = 0 To cols.Length - 1
+            Console.WriteLine(i & ": " & cols.GetValue(i).ToString())
+        Next
+        Console.Write("Index: ")
+        Dim inp = Console.ReadLine()
+        Dim idx As Integer
+        If Integer.TryParse(inp, idx) AndAlso idx >= 0 AndAlso idx < cols.Length Then
+            SpielerFG = CType(cols.GetValue(idx), ConsoleColor)
+        End If
+        Console.WriteLine("Farbe gesetzt. Drücke Taste.")
+        Console.ReadKey(True)
+    End Sub
+
+    Sub StartMenue()
+        ' Menü mit schwebender Darstellung über laufendem Hintergrund
+        ' einfache Hintergrund-Simulation: laufende Autos in Spuren
+        Dim Spuren As Integer = 6
+        Dim SpurSpalten(Spuren - 1) As Integer
+        Dim Abstand As Integer = (SPALTE_MAX + 1) \ (Spuren + 1)
+        For idxSpur As Integer = 0 To Spuren - 1
+            SpurSpalten(idxSpur) = (idxSpur + 1) * Abstand
+        Next
+
+        Dim AnzahlLanes As Integer = Math.Max(1, Spuren)
+        Dim LaneMitte(AnzahlLanes - 1) As Integer
+        For li As Integer = 0 To AnzahlLanes - 1
+            If li = 0 Then
+                LaneMitte(li) = SpurSpalten(0) \ 2
+            ElseIf li = AnzahlLanes - 1 Then
+                LaneMitte(li) = (SpurSpalten(Spuren - 1) + SPALTE_MAX) \ 2
+            Else
+                LaneMitte(li) = (SpurSpalten(li - 1) + SpurSpalten(li)) \ 2
+            End If
+        Next
+
+        Dim Gegner(AnzahlLanes - 1) As List(Of Integer)
+        For idxLane As Integer = 0 To AnzahlLanes - 1
+            Gegner(idxLane) = New List(Of Integer)()
+        Next
+
+        Dim FigurZeilen() As String = {
+            "  _____  ",
+            " /_..._\ ",
+            "(0[###]0)",
+            " `'   `' "
+        }
+        Dim FigurBreite As Integer = FigurZeilen(0).Length
+        Dim FigurHoehe As Integer = FigurZeilen.Length
+
+        Dim a_max As Single = A_MAX_START
+        Dim SpawnWahrscheinlichkeit As Single
+        Dim warteMenu As Integer = 80
+
+        Dim options() As String = {"Spiel starten", "Scoreboard", "Auto-Farben anpassen", "Beenden"}
+        Dim selected As Integer = 0
+
+        Do
+            ' Hintergrund-Spawn/Bewegung
+            SpawnWahrscheinlichkeit = 0.01F * a_max
+            Dim belegteLanes As Integer = 0
+            For bi As Integer = 0 To AnzahlLanes - 1
+                If Gegner(bi).Count > 0 Then belegteLanes += 1
+            Next
+            For sIdx As Integer = 0 To AnzahlLanes - 1
+                If belegteLanes >= AnzahlLanes - 1 Then Exit For
+                If VBMath.Rnd < SpawnWahrscheinlichkeit Then
+                    Gegner(sIdx).Add(-FigurHoehe)
+                    belegteLanes += 1
+                End If
+            Next
+            For spurIndex As Integer = 0 To AnzahlLanes - 1
+                For gegIndex As Integer = Gegner(spurIndex).Count - 1 To 0 Step -1
+                    Gegner(spurIndex)(gegIndex) += 1
+                    If Gegner(spurIndex)(gegIndex) > ZEILE_MAX Then Gegner(spurIndex).RemoveAt(gegIndex)
+                Next
+            Next
+
+            ' Hintergrund zeichnen (Spuren)
+            Console.SetCursorPosition(0, 0)
+            For z As Integer = 0 To ZEILE_MAX - 2
+                For s As Integer = 0 To SPALTE_MAX
+                    Dim istSpur As Boolean = False
+                    For si As Integer = 0 To Spuren - 1
+                        If SpurSpalten(si) = s Then
+                            istSpur = True
+                            Exit For
+                        End If
+                    Next
+                    If istSpur Then
+                        If z Mod 2 = 0 Then
+                            Console.Write("|")
+                        Else
+                            Console.Write(" ")
+                        End If
+                    Else
+                        Console.Write(" ")
+                    End If
+                Next
+                Console.WriteLine()
+            Next
+
+            ' Gegner im Hintergrund zeichnen
+            For sIdx As Integer = 0 To AnzahlLanes - 1
+                For Each gegTop In Gegner(sIdx)
+                    For er As Integer = 0 To FigurHoehe - 1
+                        Dim consoleRow As Integer = gegTop + er
+                        If consoleRow >= 0 AndAlso consoleRow <= ZEILE_MAX - 2 Then
+                            Dim colLeft As Integer = LaneMitte(sIdx) - FigurBreite \ 2
+                            If colLeft < 0 Then colLeft = 0
+                            If colLeft > SPALTE_MAX - (FigurBreite - 1) Then colLeft = SPALTE_MAX - (FigurBreite - 1)
+                            Console.SetCursorPosition(colLeft, consoleRow)
+                            Console.Write(FigurZeilen(er))
+                        End If
+                    Next
+                Next
+            Next
+
+            ' Menü mittig zeichnen (Overlay)
+            Dim menuWidth As Integer = 0
+            For Each opt In options
+                If opt.Length > menuWidth Then menuWidth = opt.Length
+            Next
+            menuWidth += 4
+            Dim menuHeight As Integer = options.Length + 2
+            Dim startX As Integer = (SPALTE_MAX + 1 - menuWidth) \ 2
+            Dim startY As Integer = (ZEILE_MAX - menuHeight) \ 2
+
+            Dim oldFG As ConsoleColor = Console.ForegroundColor
+            Dim oldBG As ConsoleColor = Console.BackgroundColor
+            Console.ForegroundColor = ConsoleColor.White
+            Console.BackgroundColor = ConsoleColor.DarkBlue
+            For my As Integer = 0 To menuHeight - 1
+                Console.SetCursorPosition(startX, startY + my)
+                Console.Write(New String(" "c, menuWidth))
+            Next
+            For idx As Integer = 0 To options.Length - 1
+                Dim indicator As String = "  "
+                If idx = selected Then indicator = "> "
+                Console.SetCursorPosition(startX + 1, startY + 1 + idx)
+                Console.Write(indicator & options(idx).PadRight(menuWidth - 3))
+            Next
+            Console.ForegroundColor = oldFG
+            Console.BackgroundColor = oldBG
+
+            ' Eingabe für Menü (non-blocking)
+            Dim taste As Integer = Tastatur_Abfrage()
+            If taste = CURSOR_UP Then
+                selected -= 1
+                If selected < 0 Then selected = options.Length - 1
+            ElseIf taste = CURSOR_DOWN Then
+                selected += 1
+                If selected >= options.Length Then selected = 0
+            ElseIf taste = CURSOR_ENTER Then
+                Select Case selected
+                    Case 0
+                        Console.Clear()
+                        Spielablauf()
+                    Case 1
+                        ZeigeScoreboard()
+                    Case 2
+                        FarbenAnpassen()
+                    Case 3
+                        Environment.Exit(0)
+                End Select
+            End If
+
+            Threading.Thread.Sleep(warteMenu)
+        Loop
+    End Sub
+
     Sub Spielablauf()
         Dim leben As Integer
         Dim spielfeld(ZEILE_MAX, SPALTE_MAX) As Char
@@ -78,6 +302,7 @@
         Dim i As Integer
         Dim Wartezeit As Integer
         Dim a_max As Single
+        Dim Punkte As Integer = 0
         ' Spuren (Lanes) für Gegner
         Dim Spuren As Integer = 6
         Dim SpurSpalten(Spuren - 1) As Integer
@@ -301,7 +526,9 @@
                     Next
                 Next
 
-                ' Spieler zeichnen (an aktueller Top-Position)
+                ' Spieler zeichnen (an aktueller Top-Position) mit einstellbarer Vordergrundfarbe
+                Dim altFG As ConsoleColor = Console.ForegroundColor
+                Console.ForegroundColor = SpielerFG
                 For r As Integer = 0 To FigurHoehe - 1
                     Dim consoleRow As Integer = SpielfigurObereZeile + r
                     If consoleRow >= 0 AndAlso consoleRow <= ZEILE_MAX - 1 Then
@@ -309,6 +536,7 @@
                         Console.Write(FigurZeilen(r))
                     End If
                 Next
+                Console.ForegroundColor = altFG
 
                 VorherigeLinks = Links
                 VorherigeObereZeile = SpielfigurObereZeile
@@ -321,6 +549,8 @@
                 Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
 
             Next
+            ' Punkte erhöhen (einfaches Scoring: Zeit/Frames überlebt)
+            Punkte += 1
             'Tastaturpuffer leeren
             Do
                 Taste = Tastatur_Abfrage()
@@ -342,6 +572,8 @@
 
         Loop Until leben <= 0
 
+        ' Spiel beendet: Punkte speichern und Gameover anzeigen
+        SaveScore(Punkte)
         Gameover()
 
 
@@ -351,8 +583,7 @@
 
     Sub Main()
         Console.CursorVisible = False
-
-        Spielablauf()
+        StartMenue()
 
 
 
