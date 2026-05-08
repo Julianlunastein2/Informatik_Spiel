@@ -5,6 +5,8 @@ Module Module1
     Const NO_KEY = 0
     Const CURSOR_LEFT = 1
     Const CURSOR_RIGHT = 2
+    Const CURSOR_UP = 3
+    Const CURSOR_DOWN = 4
     Const UNKNOWN_KEY = 99
     Const SPALTE_MAX = 79
     Const ZEILE_MAX = 24
@@ -26,6 +28,10 @@ Module Module1
                 Return CURSOR_LEFT
             ElseIf cki.Key = ConsoleKey.RightArrow Then
                 Return CURSOR_RIGHT
+            ElseIf cki.Key = ConsoleKey.UpArrow Then
+                Return CURSOR_UP
+            ElseIf cki.Key = ConsoleKey.DownArrow Then
+                Return CURSOR_DOWN
             Else
                 Return UNKNOWN_KEY
             End If
@@ -42,55 +48,10 @@ Module Module1
         Dim P As Integer    'Position des Hindernisblocks
 
 
-        'Zeilenvektor mit Leerzeichen füllen
+        'Zeilenvektor mit Leerzeichen füllen (keine "x" mehr)
         For i = 0 To SPALTE_MAX
-            Zeile(i) = " "
+            Zeile(i) = " "c
         Next
-
-        'Anzahl A der Hindernisblocks zufällig ermitteln
-        Randomize()
-        X = VBMath.Rnd
-
-        A = (a_max - A_MIN) * X + A_MIN
-        'Console.WriteLine(A)
-
-        'Für jeden der A Hindernisblocks:
-        For i = 1 To A
-
-            'Größe G des Hindernisblocks zufällig ermitteln
-            Randomize()
-            X = VBMath.Rnd
-
-            G = (G_Max - G_MIN) * X + G_MIN
-            'console.WriteLine("G: " & G)
-
-            'Startposition P des Hindernisblocks zufällig ermitteln
-            Randomize()
-            X = VBMath.Rnd
-
-            P = (SPALTE_MAX - P_MIN) * X + P_MIN
-            'Console.WriteLine("P: " & P)
-
-            'Für jedes der G Einzelhindernisse:
-            For j = 1 To G
-
-                'Prüfen ob Hinderniss innerhalb des Wertebereichs ist
-                If P + j - 1 <= SPALTE_MAX Then
-
-                    'Hinderniss an Position P+j-1 in den Zeilenvektor eintragen
-                    Zeile(P + j - 1) = "x"
-
-                End If
-
-            Next
-
-        Next
-
-        ''Ausgabe zum Test
-        'For i = 0 To SPALTE_MAX
-        '    Console.Write(Zeile(i))
-        'Next
-        'Console.WriteLine()
 
 
     End Sub
@@ -129,12 +90,60 @@ Module Module1
         Dim i As Integer
         Dim Wartezeit As Integer
         Dim a_max As Single
+        ' Spuren (Lanes) für Gegner
+        Dim Spuren As Integer = 6
+        Dim SpurSpalten(Spuren - 1) As Integer
+        Dim Abstand As Integer = (SPALTE_MAX + 1) \ (Spuren + 1)
+        For idxSpur As Integer = 0 To Spuren - 1
+            SpurSpalten(idxSpur) = (idxSpur + 1) * Abstand
+            If SpurSpalten(idxSpur) < 0 Then SpurSpalten(idxSpur) = 0
+            If SpurSpalten(idxSpur) > SPALTE_MAX Then SpurSpalten(idxSpur) = SPALTE_MAX
+        Next
+
+        ' Lanes sind die Bereiche zwischen (und außerhalb) der gestrichelten Linien; berechne Mittelpunkte
+        ' Wir erzeugen eine Lane zwischen jeder benachbarten Linie sowie links und rechts außerhalb,
+        ' damit auch am Rand Gegner erscheinen können.
+        Dim AnzahlLanes As Integer = Math.Max(1, Spuren)
+        Dim LaneMitte(AnzahlLanes - 1) As Integer
+        For li As Integer = 0 To AnzahlLanes - 1
+            If li = 0 Then
+                ' linke Außenlane: Mitte zwischen Spalte 0 und erster Spur
+                LaneMitte(li) = SpurSpalten(0) \ 2
+            ElseIf li = AnzahlLanes - 1 Then
+                ' rechte Außenlane: Mitte zwischen letzter Spur und rechter Bildschirmkante
+                LaneMitte(li) = (SpurSpalten(Spuren - 1) + SPALTE_MAX) \ 2
+            Else
+                ' mittlere Lanes: Mitte zwischen zwei benachbarten Spuren
+                LaneMitte(li) = (SpurSpalten(li - 1) + SpurSpalten(li)) \ 2
+            End If
+        Next
+
+        ' Gegner pro Lane: Liste von Top‑Zeilen (Integer). Top kann negativ sein (außerhalb oben)
+        Dim Gegner(AnzahlLanes - 1) As List(Of Integer)
+        For idxLane As Integer = 0 To AnzahlLanes - 1
+            Gegner(idxLane) = New List(Of Integer)()
+        Next
+
+        ' Mehrzeilige ASCII‑Figur (Zeilen, Breite, Höhe)
+        Dim FigurZeilen() As String = {
+            "  _____  ",
+            " /_..._\ ",
+            "(0[###]0)",
+            " `'   `' "
+        }
+        Dim FigurBreite As Integer = FigurZeilen(0).Length
+        Dim FigurHoehe As Integer = FigurZeilen.Length
+        Dim VorherigeLinks As Integer = -1
+        Dim SpielfigurObereZeile As Integer = ZEILE_MAX - FigurHoehe ' Top-Position der Spielfigur
+        Dim VorherigeObereZeile As Integer = -1
 
         'Startwerte setzen
         leben = 5
-        SpielfigurPos = SPALTE_MAX / 2
-        Wartezeit = 200
-        a_max = A_Max_Start
+        SpielfigurPos = SPALTE_MAX \ 2
+        SpielfigurObereZeile = ZEILE_MAX - FigurHoehe
+        VorherigeObereZeile = -1
+        Wartezeit = 50
+        a_max = A_MAX_START
 
         'Hauptschleife des Spiels
         Do
@@ -156,64 +165,189 @@ Module Module1
                 spielfeld(0, s) = Zeile(s)
             Next
 
-            'Spielfeld auf der Konsole ausgeben
+            'Spielfeld auf der Konsole ausgeben (mit kosmetischen Spur-Markierungen)
             Console.SetCursorPosition(0, 0)
             For z = 0 To ZEILE_MAX - 2
                 For s = 0 To SPALTE_MAX
-                    Console.Write(spielfeld(z, s))
+                    ' Prüfe ob diese Spalte eine Spur ist
+                    Dim istSpur As Boolean = False
+                    For si As Integer = 0 To Spuren - 1
+                        If SpurSpalten(si) = s Then
+                            istSpur = True
+                            Exit For
+                        End If
+                    Next
+                    If istSpur Then
+                        ' gestrichelte Markierung: jede zweite Zeile anzeigen
+                        If z Mod 2 = 0 Then
+                            Console.Write("|")
+                        Else
+                            Console.Write(" ")
+                        End If
+                    Else
+                        Console.Write(spielfeld(z, s))
+                    End If
                 Next
                 Console.WriteLine()
             Next
 
+            ' Gegner spawnen und bewegen (ein Frame vor der Spieler-Subschleife)
+            Randomize()
+            Dim SpawnWahrscheinlichkeit As Single = 0.01F * a_max
+            ' Initialisiere Spuren einmalig (falls noch nicht gesetzt)
+            Static spurenInitialisiert As Boolean = False
+            If Not spurenInitialisiert Then
+                Dim AbstandInit As Integer = (SPALTE_MAX + 1) \ (Spuren + 1)
+                For si As Integer = 0 To Spuren - 1
+                    SpurSpalten(si) = (si + 1) * AbstandInit
+                Next
+                spurenInitialisiert = True
+            End If
+
+            ' Balance: sorge dafür, dass immer mindestens eine Lane frei bleibt
+            Dim belegteLanes As Integer = 0
+            For bi As Integer = 0 To AnzahlLanes - 1
+                If Gegner(bi).Count > 0 Then belegteLanes += 1
+            Next
+
+            For sIdx As Integer = 0 To AnzahlLanes - 1
+                ' Wenn bereits alle bis auf eine Lane belegt sind, überspringe das Spawnen
+                If belegteLanes >= AnzahlLanes - 1 Then
+                    Exit For
+                End If
+                If VBMath.Rnd < SpawnWahrscheinlichkeit Then
+                    Gegner(sIdx).Add(-FigurHoehe)
+                    belegteLanes += 1
+                End If
+            Next
+
+            For spurIndex As Integer = 0 To AnzahlLanes - 1
+                For gegIndex As Integer = Gegner(spurIndex).Count - 1 To 0 Step -1
+                    Gegner(spurIndex)(gegIndex) += 1
+                    If Gegner(spurIndex)(gegIndex) > ZEILE_MAX Then Gegner(spurIndex).RemoveAt(gegIndex)
+                Next
+            Next
+
             For i = 1 To SPIELFIGUR
 
-                'Tastatur abfragen
+                ' Tastatur abfragen
                 Taste = Tastatur_Abfrage()
-                'Console.WriteLine("Taste: " & Taste)
 
-                'Spielfigur an alter Position löschen
-                Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - 1)
-                Console.Write(" ")
-
-                'Position der Spielfigur ermitteln
-                If Taste = CURSOR_LEFT Then
-                    SpielfigurPos -= 1
+                ' Alte Spieler-Position löschen (falls vorhanden)
+                If VorherigeLinks >= 0 AndAlso VorherigeObereZeile >= 0 Then
+                    For r As Integer = 0 To FigurHoehe - 1
+                        Dim konsoleZeileAlt As Integer = VorherigeObereZeile + r
+                        If konsoleZeileAlt >= 0 Then
+                            Console.SetCursorPosition(VorherigeLinks, konsoleZeileAlt)
+                            Console.Write(New String(" "c, FigurBreite))
+                        End If
+                    Next
                 End If
 
-                If Taste = CURSOR_RIGHT Then
-                    SpielfigurPos += 1
-                End If
+                ' Position ermitteln (inklusive Hoch/Runter)
+                If Taste = CURSOR_LEFT Then SpielfigurPos -= 1
+                If Taste = CURSOR_RIGHT Then SpielfigurPos += 1
+                If Taste = CURSOR_UP Then SpielfigurObereZeile -= 1
+                If Taste = CURSOR_DOWN Then SpielfigurObereZeile += 1
 
-                'Begrenzung der Spielfigur auf dem Spielfeld
-                If SpielfigurPos < 0 Then
-                    SpielfigurPos = 0
-                End If
+                ' Horizontale Begrenzung des Mittelpunkts
+                If SpielfigurPos < 0 Then SpielfigurPos = 0
+                If SpielfigurPos > SPALTE_MAX Then SpielfigurPos = SPALTE_MAX
+                ' Vertikale Begrenzung (oben/unten im Bildschirmbereich)
+                If SpielfigurObereZeile < 0 Then SpielfigurObereZeile = 0
+                If SpielfigurObereZeile > ZEILE_MAX - FigurHoehe Then SpielfigurObereZeile = ZEILE_MAX - FigurHoehe
 
-                If SpielfigurPos > SPALTE_MAX Then
-                    SpielfigurPos = SPALTE_MAX
-                End If
+                Dim Links As Integer = SpielfigurPos - FigurBreite \ 2
+                If Links < 0 Then Links = 0
+                If Links > SPALTE_MAX - (FigurBreite - 1) Then Links = SPALTE_MAX - (FigurBreite - 1)
 
-                'Kollisionserkennung
-                If spielfeld(ZEILE_MAX - 2, SpielfigurPos) = "x" Then
-                    leben -= 1
-                    Console.Beep()
+                ' Kollision mit Hindernissen (verbleibende Logik, falls spaeter wieder genutzt)
+                For r As Integer = 0 To FigurHoehe - 1
+                    Dim consoleRow As Integer = SpielfigurObereZeile + r
+                    If consoleRow >= 0 AndAlso consoleRow <= ZEILE_MAX - 2 Then
+                        For c As Integer = 0 To FigurBreite - 1
+                            If FigurZeilen(r)(c) <> " "c Then
+                                Dim feldSpalte As Integer = Links + c
+                                If feldSpalte >= 0 AndAlso feldSpalte <= SPALTE_MAX Then
+                                    If spielfeld(consoleRow, feldSpalte) = "x"c Then
+                                        ' Falls zufaellig ein "x" auftaucht: Leben abziehen (Fallback)
+                                        leben -= 1
+                                        Console.Beep()
+                                        spielfeld(consoleRow, feldSpalte) = " "c
+                                    End If
+                                End If
+                            End If
+                        Next
+                    End If
+                Next
 
-                    'Hinderniss entfernen
-                    spielfeld(ZEILE_MAX - 2, SpielfigurPos) = " "
-                End If
+                ' Kollision mit Gegnern prüfen (genaue Sprite-Überlappung)
+                Dim SpielerObereZeile As Integer = SpielfigurObereZeile
+                For spurIndex As Integer = 0 To AnzahlLanes - 1
+                    For gegIndex As Integer = Gegner(spurIndex).Count - 1 To 0 Step -1
+                        Dim GegnerObereZeile As Integer = Gegner(spurIndex)(gegIndex)
+                        Dim gekollidiert As Boolean = False
+                        For gegReiheOffset As Integer = 0 To FigurHoehe - 1
+                            Dim GegnerReihe As Integer = GegnerObereZeile + gegReiheOffset
+                            Dim SpielerReiheRel As Integer = GegnerReihe - SpielerObereZeile
+                            If SpielerReiheRel >= 0 AndAlso SpielerReiheRel <= FigurHoehe - 1 Then
+                                For gegSpalteOffset As Integer = 0 To FigurBreite - 1
+                                    Dim gegChar As Char = FigurZeilen(gegReiheOffset)(gegSpalteOffset)
+                                    If gegChar = " "c Then Continue For
+                                    Dim GegnerLinks As Integer = LaneMitte(spurIndex) - FigurBreite \ 2
+                                    Dim AbsoluteSpalte As Integer = GegnerLinks + gegSpalteOffset
+                                    Dim SpielerSpalteRel As Integer = AbsoluteSpalte - Links
+                                    If SpielerSpalteRel >= 0 AndAlso SpielerSpalteRel <= FigurBreite - 1 Then
+                                        Dim SpielerChar As Char = FigurZeilen(SpielerReiheRel)(SpielerSpalteRel)
+                                        If SpielerChar <> " "c Then
+                                            ' Kollision
+                                            leben -= 1
+                                            Console.Beep()
+                                            Gegner(spurIndex).RemoveAt(gegIndex)
+                                            gekollidiert = True
+                                            Exit For
+                                        End If
+                                    End If
+                                Next
+                            End If
+                            If gekollidiert Then Exit For
+                        Next
+                    Next
+                Next
 
+                ' Gegner zeichnen (in den Lanes zwischen den gestrichelten Linien)
+                For spurIndex As Integer = 0 To AnzahlLanes - 1
+                    For Each GegnerObereZeile In Gegner(spurIndex)
+                        For er As Integer = 0 To FigurHoehe - 1
+                            Dim consoleRow As Integer = GegnerObereZeile + er
+                            If consoleRow >= 0 AndAlso consoleRow <= ZEILE_MAX - 2 Then
+                                Dim SpalteLinks As Integer = LaneMitte(spurIndex) - FigurBreite \ 2
+                                If SpalteLinks < 0 Then SpalteLinks = 0
+                                If SpalteLinks > SPALTE_MAX - (FigurBreite - 1) Then SpalteLinks = SPALTE_MAX - (FigurBreite - 1)
+                                Console.SetCursorPosition(SpalteLinks, consoleRow)
+                                Console.Write(FigurZeilen(er))
+                            End If
+                        Next
+                    Next
+                Next
 
-                'Spielfigur auf der Konsole ausgeben
-                Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - 1)
-                Console.Write("O")
+                ' Spieler zeichnen (an aktueller Top-Position)
+                For r As Integer = 0 To FigurHoehe - 1
+                    Dim consoleRow As Integer = SpielfigurObereZeile + r
+                    If consoleRow >= 0 AndAlso consoleRow <= ZEILE_MAX - 1 Then
+                        Console.SetCursorPosition(Links, consoleRow)
+                        Console.Write(FigurZeilen(r))
+                    End If
+                Next
 
-                'Anzeige der Leben
+                VorherigeLinks = Links
+                VorherigeObereZeile = SpielfigurObereZeile
+
+                ' Anzeige der Leben
                 Console.SetCursorPosition(0, ZEILE_MAX)
-                Console.Write("Leben: " & leben)
+                Console.Write("Leben: " & leben & " ")
 
-
-
-                'Warten
+                ' Warten
                 Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
 
             Next
