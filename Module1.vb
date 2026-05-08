@@ -15,7 +15,6 @@ Module Module1
     Const P_MIN = 0
     Const P_MAX = 79
     Const SPIELFIGUR = 10
-    'Test
 
     Function Tastatur_Abfrage() As Integer
         Dim cki As New ConsoleKeyInfo()
