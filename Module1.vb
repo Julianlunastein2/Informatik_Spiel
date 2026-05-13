@@ -32,7 +32,7 @@ Module Module1
         End If
     End Function
 
-    Sub ZeilenErzeugung(ByRef Zeile() As Char, ByVal a_max As Integer, ByVal idx As Integer)
+    Sub ZeilenErzeugung(ByRef Zeile() As Char, ByVal a_max As Integer, ByVal idx As Integer, ByVal auto_schicht As Integer)
 
         'Deklarieren der Variablen
         'Dim A As Integer'    'Anzahl der Hindernisblocks
@@ -40,6 +40,12 @@ Module Module1
         Dim i As Integer
         Dim G As Integer    'Größe des Hindernisblocks
         Dim P As Integer    'Position des Hindernisblocks
+
+        'Auto Abbildung
+        Dim Auto As String() = {"  _____",'7
+                                " /_..._\",'8
+                               " (0[###]0)",'9
+                                " `'   `'"} '8
 
 
 
@@ -63,34 +69,39 @@ Module Module1
             X = VBMath.Rnd
             If X < 0.3 Then
                 P = 1 + (12 * i)
-                Zeile(P) = "x"
-            End If
-
-            'Spuren Begrenzung einfügen, alle 3 zeilen kommt kein strich
-
-            P = 0 + (12 * i)
-
-            If idx = 0 Then
-                Zeile(P) = " "
-
-            End If
-
-            If idx = 1 Then
-                Zeile(P) = "|"
 
 
-            End If
+                'Zeile 1 des Arrays ausgeben:
+                If auto_schicht >= 0 Then
+                    'Auto ausgeben indem die Anzahl der zeichen in einer Zeile des Arrays erkannt wird und die an den Stellen stehehnden zeichen ausgegeben:
 
-            If idx = 2 Then
-                Zeile(P) = "|"
+                    For j = 0 To Auto(auto_schicht).Length - 1
+                        Zeile(P + j) = Auto(auto_schicht)(j)
+                    Next
+                End If
 
 
+                'Autoförmige Hindernisse anhand des Auto-Arrays in den Zeilen, zwischen den Fahrbahnmakierungen ausgeben
 
-            End If
 
+                'Spuren Begrenzung einfügen, alle 3 zeilen kommt kein strich
 
-            Console.WriteLine(idx)
+                P = 0 + (12 * i)
 
+                    If idx = 0 Then
+                        Zeile(P) = " "
+                    End If
+
+                    If idx = 1 Then
+                        Zeile(P) = "|"
+                    End If
+
+                    If idx = 2 Then
+                        Zeile(P) = "|"
+                    End If
+
+                    'Console.WriteLine(idx)
+                End If
 
         Next
         Exit Sub
@@ -164,17 +175,23 @@ Module Module1
         Dim Wartezeit As Integer
         Dim a_max As Single
         Dim idx = 0  'Zähler für die Spurenbegrenzung
+        Dim AutoSchicht As Integer = 4 'Zähler für die Autoabildung
 
         'Startwerte setzen
         leben = 5
         SpielfigurPos = SPALTE_MAX / 2
         Wartezeit = 200
-        a_max = A_Max_Start
+        a_max = A_MAX_START
 
         'Hauptschleife des Spiels
         Do
             'neue Zeile erzeugen
-            ZeilenErzeugung(Zeile, a_max, idx)
+            ZeilenErzeugung(Zeile, a_max, idx, AutoSchicht)
+
+            'Auto Schicht um auto von hinten auszubenen, damit es von oben nach unten fährt (ohne dass out of array fehler erzeugt wird)
+            AutoSchicht = AutoSchicht - 1
+            If AutoSchicht <= -1 Then AutoSchicht = 4
+
 
             idx = idx + 1
             If idx > 2 Then idx = 0
