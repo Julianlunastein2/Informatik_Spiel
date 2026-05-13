@@ -10,27 +10,27 @@
     Const SPALTE_MAX = 79
     Const ZEILE_MAX = 24
     Const A_MAX_START = 2
-    ' frühere Konstanten für Hindernis-Generierung entfernt (nicht mehr verwendet)
     Const SPIELFIGUR = 10
-    ' Spieler-Farbe (anpassbar im Startmenü)
-    Dim SpielerFG As ConsoleColor = ConsoleColor.Green
 
+    'Spieler-Farbe (anpassbar im Startmenü)
+    Dim Spielerfarbe As ConsoleColor = ConsoleColor.Green
 
+    'Abfrage der gedrückten Taste (Pfeiltasten und Enter) ohne Blockieren, wenn keine Taste gedrückt wurde
     Function Tastatur_Abfrage() As Integer
-        Dim cki As New ConsoleKeyInfo()
+        Dim eingabe As New ConsoleKeyInfo()
         If Console.KeyAvailable = False Then
             Return NO_KEY
         Else
-            cki = Console.ReadKey(True)
-            If cki.Key = ConsoleKey.LeftArrow Then
+            eingabe = Console.ReadKey(True)
+            If eingabe.Key = ConsoleKey.LeftArrow Then
                 Return CURSOR_LEFT
-            ElseIf cki.Key = ConsoleKey.RightArrow Then
+            ElseIf eingabe.Key = ConsoleKey.RightArrow Then
                 Return CURSOR_RIGHT
-            ElseIf cki.Key = ConsoleKey.UpArrow Then
+            ElseIf eingabe.Key = ConsoleKey.UpArrow Then
                 Return CURSOR_UP
-            ElseIf cki.Key = ConsoleKey.DownArrow Then
+            ElseIf eingabe.Key = ConsoleKey.DownArrow Then
                 Return CURSOR_DOWN
-            ElseIf cki.Key = ConsoleKey.Enter Then
+            ElseIf eingabe.Key = ConsoleKey.Enter Then
                 Return CURSOR_ENTER
             Else
                 Return UNKNOWN_KEY
@@ -40,21 +40,24 @@
 
     Sub ZeilenErzeugung(ByRef Zeile() As Char, ByVal a_max As Integer)
 
-        ' Laufvariable; alle alten Variablen für die alte Hinderniserzeugung entfernt
+        'Laufvariable; alle alten Variablen für die alte Hinderniserzeugung entfernt
         Dim i As Integer
 
-        ' Zeilenvektor mit Leerzeichen füllen (keine "x" mehr)
+        'Zeilenvektor mit Leerzeichen füllen
         For i = 0 To SPALTE_MAX
-            Zeile(i) = " "c
+            Zeile(i) = " "
         Next
 
     End Sub
 
+
+    'Anzeige des Gameover-Bildschirms mit ASCII-Art und rotem Hintergrund
     Sub Gameover()
+
         Console.BackgroundColor = ConsoleColor.Red
         Console.ForegroundColor = ConsoleColor.White
         Console.Clear()
-        'Game over Screen
+
         Console.WriteLine("
 
 
@@ -73,40 +76,44 @@
         Console.ReadLine()
     End Sub
 
+    'Speichert den aktuellen Punktestand in einer Datei
     Sub SaveScore(ByVal punktzahl As Integer)
-        Try
-            Dim path As String = "scores.txt"
-            Dim scores As New System.Collections.Generic.List(Of Integer)
-            If System.IO.File.Exists(path) Then
-                For Each line In System.IO.File.ReadAllLines(path)
-                    Dim v As Integer
-                    If Integer.TryParse(line, v) Then scores.Add(v)
-                Next
-            End If
-            scores.Add(punktzahl)
-            scores.Sort()
-            scores.Reverse()
-            If scores.Count > 10 Then scores = scores.GetRange(0, 10)
-            Dim out As New System.Collections.Generic.List(Of String)
-            For Each v In scores
-                out.Add(v.ToString())
-            Next
-            System.IO.File.WriteAllLines(path, out.ToArray())
-        Catch ex As Exception
-            ' ignore save errors in this simple student project
-        End Try
+        'Try
+        '    Dim path As String = "scores.txt"
+        '    Dim scores As New System.Collections.Generic.List(Of Integer)
+        '    If System.IO.File.Exists(path) Then
+        '        For Each line In System.IO.File.ReadAllLines(path)
+        '            Dim v As Integer
+        '            If Integer.TryParse(line, v) Then scores.Add(v)
+        '        Next
+        '    End If
+        '    scores.Add(punktzahl)
+        '    scores.Sort()
+        '    scores.Reverse()
+        '    If scores.Count > 10 Then scores = scores.GetRange(0, 10)
+        '    Dim out As New System.Collections.Generic.List(Of String)
+        '    For Each v In scores
+        '        out.Add(v.ToString())
+        '    Next
+        '    System.IO.File.WriteAllLines(path, out.ToArray())
+        'Catch ex As Exception
+        '    'Speicherfehler ignorieren, da es nicht kritisch ist
+        'End Try
     End Sub
 
+    'Anzeige des Scoreboards mit den Top 10 Punkteständen aus der Datei
     Sub ZeigeScoreboard()
+
+        Dim dateipfad As String = "scores.txt"
+        Dim zeilen = System.IO.File.ReadAllLines(dateipfad)
+        Dim idx As Integer = 1
+
         Console.Clear()
         Console.WriteLine("--- Scoreboard (Top 10) ---")
-        Dim path As String = "scores.txt"
-        If Not System.IO.File.Exists(path) Then
+        If Not System.IO.File.Exists(dateipfad) Then
             Console.WriteLine("Noch keine Scores vorhanden.")
         Else
-            Dim lines = System.IO.File.ReadAllLines(path)
-            Dim idx As Integer = 1
-            For Each l In lines
+            For Each l In zeilen
                 Console.WriteLine(idx & ". " & l)
                 idx += 1
                 If idx > 10 Then Exit For
@@ -117,18 +124,22 @@
         Console.ReadKey(True)
     End Sub
 
+
+    'FarbAnpassung: Ermöglicht dem Spieler, die Vordergrundfarbe seines Autos im Startmenü anzupassen
     Sub FarbenAnpassen()
-        Dim cols = System.Enum.GetValues(GetType(ConsoleColor))
+        Dim col = System.Enum.GetValues(GetType(ConsoleColor))
+        Dim inp = Console.ReadLine()
+        Dim idx As Integer
+
         Console.Clear()
         Console.WriteLine("Wähle Vordergrundfarbe für dein Auto (Index eingeben):")
         For i As Integer = 0 To cols.Length - 1
             Console.WriteLine(i & ": " & cols.GetValue(i).ToString())
         Next
         Console.Write("Index: ")
-        Dim inp = Console.ReadLine()
-        Dim idx As Integer
+
         If Integer.TryParse(inp, idx) AndAlso idx >= 0 AndAlso idx < cols.Length Then
-            SpielerFG = CType(cols.GetValue(idx), ConsoleColor)
+            Spielerfarbe = CType(cols.GetValue(idx), ConsoleColor)
         End If
         Console.WriteLine("Farbe gesetzt. Drücke Taste.")
         Console.ReadKey(True)
@@ -526,9 +537,9 @@
                     Next
                 Next
 
-                ' Spieler zeichnen (an aktueller Top-Position) mit einstellbarer Vordergrundfarbe
+                'Spieler zeichnen (an aktueller Top-Position) mit einstellbarer Vordergrundfarbe
                 Dim altFG As ConsoleColor = Console.ForegroundColor
-                Console.ForegroundColor = SpielerFG
+                Console.ForegroundColor = Spielerfarbe
                 For r As Integer = 0 To FigurHoehe - 1
                     Dim consoleRow As Integer = SpielfigurObereZeile + r
                     If consoleRow >= 0 AndAlso consoleRow <= ZEILE_MAX - 1 Then
@@ -541,15 +552,15 @@
                 VorherigeLinks = Links
                 VorherigeObereZeile = SpielfigurObereZeile
 
-                ' Anzeige der Leben
+                'Anzeige der Leben
                 Console.SetCursorPosition(0, ZEILE_MAX)
                 Console.Write("Leben: " & leben & " ")
 
-                ' Warten
+                'Warten
                 Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
 
             Next
-            ' Punkte erhöhen (einfaches Scoring: Zeit/Frames überlebt)
+            'Punkte erhöhen (einfaches Scoring: Zeit/Frames überlebt)
             Punkte += 1
             'Tastaturpuffer leeren
             Do
