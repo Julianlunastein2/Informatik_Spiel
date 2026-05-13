@@ -32,7 +32,7 @@ Module Module1
         End If
     End Function
 
-    Sub ZeilenErzeugung(ByRef Zeile() As Char, ByVal a_max As Integer)
+    Sub ZeilenErzeugung(ByRef Zeile() As Char, ByVal a_max As Integer, ByVal idx As Integer)
 
         'Deklarieren der Variablen
         'Dim A As Integer'    'Anzahl der Hindernisblocks
@@ -40,7 +40,7 @@ Module Module1
         Dim i As Integer
         Dim G As Integer    'Größe des Hindernisblocks
         Dim P As Integer    'Position des Hindernisblocks
-        Dim idx = 0 'Zähler für die Spurenbegrenzung
+
 
 
         'Zeilenvektor mit Leerzeichen füllen
@@ -70,7 +70,23 @@ Module Module1
 
             P = 0 + (12 * i)
 
+            If idx = 0 Then
+                Zeile(P) = " "
 
+            End If
+
+            If idx = 1 Then
+                Zeile(P) = "|"
+
+
+            End If
+
+            If idx = 2 Then
+                Zeile(P) = "|"
+
+
+
+            End If
 
 
             Console.WriteLine(idx)
@@ -147,6 +163,7 @@ Module Module1
         Dim i As Integer
         Dim Wartezeit As Integer
         Dim a_max As Single
+        Dim idx = 0  'Zähler für die Spurenbegrenzung
 
         'Startwerte setzen
         leben = 5
@@ -157,7 +174,10 @@ Module Module1
         'Hauptschleife des Spiels
         Do
             'neue Zeile erzeugen
-            ZeilenErzeugung(Zeile, a_max)
+            ZeilenErzeugung(Zeile, a_max, idx)
+
+            idx = idx + 1
+            If idx > 2 Then idx = 0
 
             'Alle Zeilen des Spielfelds um eine Zeile nach unten verschieben
             'Rückwärtschleife über zeilen
