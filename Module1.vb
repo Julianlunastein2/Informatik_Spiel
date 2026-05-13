@@ -35,11 +35,12 @@ Module Module1
     Sub ZeilenErzeugung(ByRef Zeile() As Char, ByVal a_max As Integer)
 
         'Deklarieren der Variablen
-        Dim A As Integer    'Anzahl der Hindernisblocks
+        'Dim A As Integer'    'Anzahl der Hindernisblocks
         Dim X As Single
         Dim i As Integer
         Dim G As Integer    'Größe des Hindernisblocks
         Dim P As Integer    'Position des Hindernisblocks
+        Dim idx = 0 'Zähler für die Spurenbegrenzung
 
 
         'Zeilenvektor mit Leerzeichen füllen
@@ -51,40 +52,57 @@ Module Module1
         Randomize()
         X = VBMath.Rnd
 
-        A = (a_max - A_MIN) * X + A_MIN
+        'A = (a_max - A_MIN) * X + A_MIN
         'Console.WriteLine(A)
 
         'Für jeden der A Hindernisblocks:
-        For i = 1 To A
+        For i = 0 To 4
 
             'Größe G des Hindernisblocks zufällig ermitteln
             Randomize()
             X = VBMath.Rnd
+            If X < 0.3 Then
+                P = 1 + (12 * i)
+                Zeile(P) = "x"
+            End If
 
-            G = (G_Max - G_MIN) * X + G_MIN
-            'console.WriteLine("G: " & G)
+            'Spuren Begrenzung einfügen, alle 3 zeilen kommt kein strich
 
-            'Startposition P des Hindernisblocks zufällig ermitteln
-            Randomize()
-            X = VBMath.Rnd
+            P = 0 + (12 * i)
 
-            P = (SPALTE_MAX - P_MIN) * X + P_MIN
-            'Console.WriteLine("P: " & P)
 
-            'Für jedes der G Einzelhindernisse:
-            For j = 1 To G
 
-                'Prüfen ob Hinderniss innerhalb des Wertebereichs ist
-                If P + j - 1 <= SPALTE_MAX Then
 
-                    'Hinderniss an Position P+j-1 in den Zeilenvektor eintragen
-                    Zeile(P + j - 1) = "x"
+            Console.WriteLine(idx)
 
-                End If
-
-            Next
 
         Next
+        Exit Sub
+
+        ''G = (G_Max - G_MIN) * X + G_MIN
+        ''console.WriteLine("G: " & G)
+
+        ''Startposition P des Hindernisblocks zufällig ermitteln
+        'Randomize()
+        'X = VBMath.Rnd
+
+        'P = (SPALTE_MAX - P_MIN) * X + P_MIN
+        ''Console.WriteLine("P: " & P)
+
+        ''Für jedes der G Einzelhindernisse:
+        'For j = 1 To G
+
+        '    'Prüfen ob Hinderniss innerhalb des Wertebereichs ist
+        '    If P + j - 1 <= SPALTE_MAX Then
+
+        '        'Hinderniss an Position P+j-1 in den Zeilenvektor eintragen
+
+
+        '    End If
+
+        'Next
+
+
 
         ''Ausgabe zum Test
         'For i = 0 To SPALTE_MAX
