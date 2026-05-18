@@ -33,7 +33,13 @@ Module Module1
         End If
     End Function
 
-    Sub ZeilenErzeugung(ByRef Zeile() As Char, ByVal a_max As Integer, ByVal idx As Integer, ByVal auto_schicht As Integer, ByRef autoInSpur() As Boolean)
+
+    '=========================================================================================================================
+    'Hindernis und Spielfeld -Generierung
+    '=========================================================================================================================
+
+
+    Sub ZeilenErzeugung(ByRef Zeile() As Char, ByVal a_max As Integer, ByVal idx As Integer, ByVal auto_schicht As Integer, ByRef autoInSpur() As Boolean, ByRef spawnCooldown As Integer)
 
         'Deklarieren der Variablen
         'Dim A As Integer'    'Anzahl der Hindernisblocks
@@ -83,17 +89,24 @@ Module Module1
             'Entscheiden ob ein neues Auto "gedruckt" wird anahnd auto_schicht, um Überlappung zu vermeiden und grafik fehler zu vermeiden
             If auto_schicht = 3 Then
 
-                Randomize()
-                X = VBMath.Rnd
-                If X < 0.25 Then '25% Chance auf Auto
-                    autoInSpur(i) = True
-                Else
+                If spawnCooldown Then
+                    spawnCooldown = spawnCooldown - 1
                     autoInSpur(i) = False
-                End If
-            End If
 
-            'Auto ausgeben wenn autoInSpur = true
-            If autoInSpur(i) = True Then
+                Else
+                End If
+
+                Randomize()
+                    X = VBMath.Rnd
+                    If X < 0.25 Then '25% Chance auf Auto
+                        autoInSpur(i) = True
+                    Else
+                        autoInSpur(i) = False
+                    End If
+                End If
+
+                'Auto ausgeben wenn autoInSpur = true
+                If autoInSpur(i) = True Then
 
                 P = 1 + (12 * i)
 
@@ -147,6 +160,10 @@ Module Module1
 
     End Sub
 
+    '=========================================================================================================================
+    'Gameover Screen
+    '=========================================================================================================================
+
     Sub Gameover()
         Console.BackgroundColor = ConsoleColor.Red
         Console.ForegroundColor = ConsoleColor.White
@@ -170,6 +187,10 @@ Module Module1
         Console.ReadLine()
     End Sub
 
+    '=========================================================================================================================
+    'Grundlegender Spielablauf
+    '=========================================================================================================================
+
     Sub Spielablauf()
         Dim leben As Integer
         Dim spielfeld(ZEILE_MAX, SPALTE_MAX) As Char
@@ -184,6 +205,7 @@ Module Module1
         Dim idx = 0  'Zähler für die Spurenbegrenzung
         Dim auto_schicht As Integer = 3 'Zähler für die Autoabildung
         Dim autoInSpur(4) As Boolean 'Variable um zu entscheiden ob ein Auto in der Spur ist oder nicht, damit es nicht in jeder Zeile ein Auto gibt
+        Dim spawnCooldown As Integer = 0 'Cooldown um zu verhindern dass in jeder Zeile ein Auto spawnt, eleminiert langweilige Optik von einem "Block" Gegner
 
         'Startwerte setzen
         leben = 5
@@ -194,7 +216,7 @@ Module Module1
         'Hauptschleife des Spiels
         Do
             'neue Zeile erzeugen
-            ZeilenErzeugung(Zeile, a_max, idx, auto_schicht, autoInSpur)
+            ZeilenErzeugung(Zeile, a_max, idx, auto_schicht, autoInSpur, spawnCooldown)
 
             'Auto Schicht um auto von hinten auszubenen, damit es von oben nach unten fährt (ohne dass out of array fehler erzeugt wird)
             auto_schicht = auto_schicht - 1
@@ -307,6 +329,10 @@ Module Module1
 
     End Sub
 
+
+    '=========================================================================================================================
+    'Sub der den Hauptablauf des Spiels steuert, von der Zeilenerzeugung über die Kollisionserkennung bis hin zum Gameover Screen
+    '=========================================================================================================================
 
     Sub Main()
         Console.CursorVisible = False
