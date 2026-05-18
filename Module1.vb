@@ -64,10 +64,23 @@ Module Module1
         'Für jeden der A Hindernisblocks:
         For i = 0 To 4
 
+            'Spuren Begrenzung einfügen, alle 3 zeilen kommt kein strich
+
+            P = 0 + (12 * i)
+
+            If idx = 1 OrElse idx = 2 Then
+                Zeile(P) = "|"
+
+            ElseIf idx = 0 Then
+                Zeile(P) = " "
+            End If
+
+            'Console.WriteLine(idx)
+
             'Größe G des Hindernisblocks zufällig ermitteln
             Randomize()
             X = VBMath.Rnd
-            If X < 0.3 Then
+            If X < 0.1 Then
                 P = 1 + (12 * i)
 
 
@@ -83,18 +96,7 @@ Module Module1
                 'Autoförmige Hindernisse anhand des Auto-Arrays in den Zeilen, zwischen den Fahrbahnmakierungen ausgeben
 
 
-                'Spuren Begrenzung einfügen, alle 3 zeilen kommt kein strich
 
-                P = 0 + (12 * i)
-
-                If idx = 1 OrElse idx = 2 Then
-                    Zeile(P) = "|"
-
-                ElseIf idx = 0 Then
-                    Zeile(P) = " "
-                End If
-
-                'Console.WriteLine(idx)
             End If
 
         Next
