@@ -71,7 +71,6 @@ Module Module1
                 P = 1 + (12 * i)
 
 
-                'Zeile 1 des Arrays ausgeben:
                 If auto_schicht >= 0 Then
                     'Auto ausgeben indem die Anzahl der zeichen in einer Zeile des Arrays erkannt wird und die an den Stellen stehehnden zeichen ausgegeben:
 
@@ -88,20 +87,15 @@ Module Module1
 
                 P = 0 + (12 * i)
 
-                    If idx = 0 Then
-                        Zeile(P) = " "
-                    End If
+                If idx = 1 OrElse idx = 2 Then
+                    Zeile(P) = "|"
 
-                    If idx = 1 Then
-                        Zeile(P) = "|"
-                    End If
-
-                    If idx = 2 Then
-                        Zeile(P) = "|"
-                    End If
-
-                    'Console.WriteLine(idx)
+                ElseIf idx = 0 Then
+                    Zeile(P) = " "
                 End If
+
+                'Console.WriteLine(idx)
+            End If
 
         Next
         Exit Sub
@@ -175,7 +169,7 @@ Module Module1
         Dim Wartezeit As Integer
         Dim a_max As Single
         Dim idx = 0  'Zähler für die Spurenbegrenzung
-        Dim AutoSchicht As Integer = 4 'Zähler für die Autoabildung
+        Dim auto_schicht As Integer = 3 'Zähler für die Autoabildung
 
         'Startwerte setzen
         leben = 5
@@ -186,11 +180,11 @@ Module Module1
         'Hauptschleife des Spiels
         Do
             'neue Zeile erzeugen
-            ZeilenErzeugung(Zeile, a_max, idx, AutoSchicht)
+            ZeilenErzeugung(Zeile, a_max, idx, auto_schicht)
 
             'Auto Schicht um auto von hinten auszubenen, damit es von oben nach unten fährt (ohne dass out of array fehler erzeugt wird)
-            AutoSchicht = AutoSchicht - 1
-            If AutoSchicht <= -1 Then AutoSchicht = 4
+            auto_schicht = auto_schicht - 1
+            If auto_schicht <= -1 Then auto_schicht = 3
 
 
             idx = idx + 1
