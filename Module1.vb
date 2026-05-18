@@ -1,4 +1,5 @@
 ﻿Imports System.Linq.Expressions
+Imports System.Net.Security
 
 Module Module1
 
@@ -32,7 +33,7 @@ Module Module1
         End If
     End Function
 
-    Sub ZeilenErzeugung(ByRef Zeile() As Char, ByVal a_max As Integer, ByVal idx As Integer, ByVal auto_schicht As Integer)
+    Sub ZeilenErzeugung(ByRef Zeile() As Char, ByVal a_max As Integer, ByVal idx As Integer, ByVal auto_schicht As Integer, ByRef autoInSpur() As Boolean)
 
         'Deklarieren der Variablen
         'Dim A As Integer'    'Anzahl der Hindernisblocks
@@ -78,26 +79,36 @@ Module Module1
             'Console.WriteLine(idx)
 
             'Größe G des Hindernisblocks zufällig ermitteln
-            Randomize()
-            X = VBMath.Rnd
-            If X < 0.1 Then
+
+            'Entscheiden ob ein neues Auto "gedruckt" wird anahnd auto_schicht, um Überlappung zu vermeiden und grafik fehler zu vermeiden
+            If auto_schicht = 3 Then
+
+                Randomize()
+                X = VBMath.Rnd
+                If X < 0.25 Then '25% Chance auf Auto
+                    autoInSpur(i) = True
+                Else
+                    autoInSpur(i) = False
+                End If
+            End If
+
+            'Auto ausgeben wenn autoInSpur = true
+            If autoInSpur(i) = True Then
+
                 P = 1 + (12 * i)
 
-
+                'Autoförmige Hindernisse anhand des Auto-Arrays in den Zeilen, zwischen den Fahrbahnmakierungen ausgeben
                 If auto_schicht >= 0 Then
-                    'Auto ausgeben indem die Anzahl der zeichen in einer Zeile des Arrays erkannt wird und die an den Stellen stehehnden zeichen ausgegeben:
 
                     For j = 0 To Auto(auto_schicht).Length - 1
                         Zeile(P + j) = Auto(auto_schicht)(j)
                     Next
+
                 End If
 
-
-                'Autoförmige Hindernisse anhand des Auto-Arrays in den Zeilen, zwischen den Fahrbahnmakierungen ausgeben
-
-
-
             End If
+
+
 
         Next
         Exit Sub
@@ -172,6 +183,7 @@ Module Module1
         Dim a_max As Single
         Dim idx = 0  'Zähler für die Spurenbegrenzung
         Dim auto_schicht As Integer = 3 'Zähler für die Autoabildung
+        Dim autoInSpur(4) As Boolean 'Variable um zu entscheiden ob ein Auto in der Spur ist oder nicht, damit es nicht in jeder Zeile ein Auto gibt
 
         'Startwerte setzen
         leben = 5
@@ -182,7 +194,7 @@ Module Module1
         'Hauptschleife des Spiels
         Do
             'neue Zeile erzeugen
-            ZeilenErzeugung(Zeile, a_max, idx, auto_schicht)
+            ZeilenErzeugung(Zeile, a_max, idx, auto_schicht, autoInSpur)
 
             'Auto Schicht um auto von hinten auszubenen, damit es von oben nach unten fährt (ohne dass out of array fehler erzeugt wird)
             auto_schicht = auto_schicht - 1
