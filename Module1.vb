@@ -259,7 +259,7 @@ Module Module1
                 'Spielfigur an alter Position löschen
                 For h As Integer = 1 To 4
                     Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - h)
-                    Console.Write("          ")
+                    Console.Write("         ")
                 Next
 
                 'Position der Spielfigur ermitteln
@@ -280,25 +280,28 @@ Module Module1
                         SpielfigurPos = SPALTE_MAX
                     End If
 
-                    'Kollisionserkennung
-                    If spielfeld(ZEILE_MAX - 2, SpielfigurPos) = "x" Then
-                        leben -= 1
-                        Console.Beep()
+                'Kollisionserkennung
+                If spielfeld(ZEILE_MAX - 5, SpielfigurPos) = " " Or spielfeld(ZEILE_MAX - 5, SpielfigurPos) = "|" Or spielfeld(ZEILE_MAX - 5, SpielfigurPos) = Chr(0) Then
 
-                        'Hinderniss entfernen
-                        spielfeld(ZEILE_MAX - 2, SpielfigurPos) = " "
-                    End If
+                Else
+                    'Leben abziehen
+                    leben = leben - 1
+                    Console.Beep()
+
+                    'Hinderniss entfernen
+                    spielfeld(ZEILE_MAX - 2, SpielfigurPos) = " "
+                End If
 
 
                 'Spielfigur auf der Konsole ausgeben
                 Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 1)
-                Console.Write("`'   `' ")
+                Console.Write("`'   `'")
                 Console.SetCursorPosition(SpielfigurPos + 0, ZEILE_MAX - 2)
-                Console.Write("(0[###]0) ")
+                Console.Write("(0[###]0)")
                 Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 3)
-                Console.Write("/_..._\ ")
+                Console.Write("/_..._\")
                 Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 4)
-                Console.Write("_____ ")
+                Console.Write("_____")
 
                 'Anzeige der Leben
                 Console.SetCursorPosition(0, ZEILE_MAX)
