@@ -49,10 +49,10 @@ Module Module1
         Dim P As Integer    'Position des Hindernisblocks
 
         'Auto Abbildung
-        Dim Auto As String() = {"  _____",'7
-                                " /_..._\",'8
-                               " (0[###]0)",'9
-                                " `'   `'"} '8
+        Dim Auto As String() = {"   _____",'7
+                                "  /_..._\",'8
+                                " (0[###]0)",'9
+                                "  `'   `'"} '8
 
 
 
@@ -257,53 +257,61 @@ Module Module1
                 'Console.WriteLine("Taste: " & Taste)
 
                 'Spielfigur an alter Position löschen
-                Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - 1)
-                Console.Write(" ")
+                For h As Integer = 1 To 4
+                    Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - h)
+                    Console.Write(" ")
+                Next
 
                 'Position der Spielfigur ermitteln
                 If Taste = CURSOR_LEFT Then
-                    SpielfigurPos -= 1
-                End If
+                        SpielfigurPos -= 1
+                    End If
 
-                If Taste = CURSOR_RIGHT Then
-                    SpielfigurPos += 1
-                End If
+                    If Taste = CURSOR_RIGHT Then
+                        SpielfigurPos += 1
+                    End If
 
-                'Begrenzung der Spielfigur auf dem Spielfeld
-                If SpielfigurPos < 0 Then
-                    SpielfigurPos = 0
-                End If
+                    'Begrenzung der Spielfigur auf dem Spielfeld
+                    If SpielfigurPos < 0 Then
+                        SpielfigurPos = 0
+                    End If
 
-                If SpielfigurPos > SPALTE_MAX Then
-                    SpielfigurPos = SPALTE_MAX
-                End If
+                    If SpielfigurPos > SPALTE_MAX Then
+                        SpielfigurPos = SPALTE_MAX
+                    End If
 
-                'Kollisionserkennung
-                If spielfeld(ZEILE_MAX - 2, SpielfigurPos) = "x" Then
-                    leben -= 1
-                    Console.Beep()
+                    'Kollisionserkennung
+                    If spielfeld(ZEILE_MAX - 2, SpielfigurPos) = "x" Then
+                        leben -= 1
+                        Console.Beep()
 
-                    'Hinderniss entfernen
-                    spielfeld(ZEILE_MAX - 2, SpielfigurPos) = " "
-                End If
+                        'Hinderniss entfernen
+                        spielfeld(ZEILE_MAX - 2, SpielfigurPos) = " "
+                    End If
 
 
-                'Spielfigur auf der Konsole ausgeben
-                Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - 1)
-                Console.Write("O")
+                    'Spielfigur auf der Konsole ausgeben
+                    Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - 1)
+                Console.Write("  `'   `' ")
+                Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - 2)
+                Console.Write(" (0[###]0) ")
+                Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - 3)
+                Console.Write("  /_..._\ ")
+                Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - 4)
+                Console.Write("   _____ ")
 
                 'Anzeige der Leben
                 Console.SetCursorPosition(0, ZEILE_MAX)
-                Console.Write("Leben: " & leben)
+                    Console.Write("Leben: " & leben)
 
 
 
-                'Warten
-                Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
+                    'Warten
+                    Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
 
-            Next
-            'Tastaturpuffer leeren
-            Do
+                Next
+                'Tastaturpuffer leeren
+                Do
                 Taste = Tastatur_Abfrage()
             Loop Until Taste = NO_KEY
 
