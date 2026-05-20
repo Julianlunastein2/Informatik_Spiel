@@ -281,30 +281,55 @@ Module Module1
                     End If
 
                 'Kollisionserkennung
-                If spielfeld(ZEILE_MAX - 5, SpielfigurPos) = " " Or spielfeld(ZEILE_MAX - 5, SpielfigurPos) = "|" Or spielfeld(ZEILE_MAX - 5, SpielfigurPos) = Chr(0) Then
 
-                Else
-                    'Leben abziehen
-                    leben = leben - 1
-                    Console.Beep()
+                For h As Integer = 1 To 8
+                    If spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = " " Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "|" Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = Chr(0) Then
+                        'Keine Kollision
 
-                    'Hinderniss entfernen
-                    spielfeld(ZEILE_MAX - 2, SpielfigurPos) = " "
-                End If
 
+                    Else
+
+                        'Leben abziehen
+                        leben = leben - 1
+                        Console.Beep()
+
+                        'Zwei Varianten zum Entfernen des Hindernisses nach Kontakt:
+                        'I Bereich in der Größe eines Gegners "über" der Spielfigur löschen --> Nachteil: Gegner können "zerschnitten" werden
+
+                        'For k As Integer = 0 To 8
+                        '    For l As Integer = 0 To 3
+                        '        spielfeld(ZEILE_MAX - 5 - l, SpielfigurPos + k) = " "
+                        '    Next
+                        'Next
+
+                        'II Spur(en) in dem die Kollision anhand der Spielerposition erkennen und Gegner in dem Bereich des nächsten Gegners löschen
+
+                        Dim spielfigurEnde As Integer = SpielfigurPos + 8
+
+                        If SpielfigurPos Or spielfigurEnde > 0 And spielfigurEnde < 11 Then
+                            For k As Integer = 0 To 11
+                                For l As Integer = 0 To 3
+                                    spielfeld(ZEILE_MAX - 5 - l, k) = "!"
+                                Next
+                            Next
+
+                        End If
+                    End If
+
+                Next
 
                 'Spielfigur auf der Konsole ausgeben
                 Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 1)
-                Console.Write("`'   `'")
-                Console.SetCursorPosition(SpielfigurPos + 0, ZEILE_MAX - 2)
-                Console.Write("(0[###]0)")
-                Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 3)
-                Console.Write("/_..._\")
-                Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 4)
-                Console.Write("_____")
+                    Console.Write("`'   `'")
+                    Console.SetCursorPosition(SpielfigurPos + 0, ZEILE_MAX - 2)
+                    Console.Write("(0[###]0)")
+                    Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 3)
+                    Console.Write("/_..._\")
+                    Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 4)
+                    Console.Write("_____")
 
-                'Anzeige der Leben
-                Console.SetCursorPosition(0, ZEILE_MAX)
+                    'Anzeige der Leben
+                    Console.SetCursorPosition(0, ZEILE_MAX)
                     Console.Write("Leben: " & leben)
 
 
