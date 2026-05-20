@@ -259,7 +259,7 @@ Module Module1
                 'Spielfigur an alter Position löschen
                 For h As Integer = 1 To 4
                     Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - h)
-                    Console.Write(" ")
+                    Console.Write("          ")
                 Next
 
                 'Position der Spielfigur ermitteln
@@ -290,15 +290,15 @@ Module Module1
                     End If
 
 
-                    'Spielfigur auf der Konsole ausgeben
-                    Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - 1)
-                Console.Write("  `'   `' ")
-                Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - 2)
-                Console.Write(" (0[###]0) ")
-                Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - 3)
-                Console.Write("  /_..._\ ")
-                Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - 4)
-                Console.Write("   _____ ")
+                'Spielfigur auf der Konsole ausgeben
+                Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 1)
+                Console.Write("`'   `' ")
+                Console.SetCursorPosition(SpielfigurPos + 0, ZEILE_MAX - 2)
+                Console.Write("(0[###]0) ")
+                Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 3)
+                Console.Write("/_..._\ ")
+                Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 4)
+                Console.Write("_____ ")
 
                 'Anzeige der Leben
                 Console.SetCursorPosition(0, ZEILE_MAX)
