@@ -286,34 +286,34 @@ Module Module1
                     If spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = " " Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "|" Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = Chr(0) Then
                         'Keine Kollision
 
-
                     Else
 
                         'Leben abziehen
                         leben = leben - 1
                         Console.Beep()
 
-                        'Zwei Varianten zum Entfernen des Hindernisses nach Kontakt:
-                        'I Bereich in der Größe eines Gegners "über" der Spielfigur löschen --> Nachteil: Gegner können "zerschnitten" werden
+                        'Zwei Varianten zum Entfernen des Hindernisses nach Kontakt
+                        'i Bereich in der Größe eines Gegners "über" der Spielfigur löschen --> Nachteil: Gegner können "zerschnitten" werden
 
-                        'For k As Integer = 0 To 8
-                        '    For l As Integer = 0 To 3
-                        '        spielfeld(ZEILE_MAX - 5 - l, SpielfigurPos + k) = " "
-                        '    Next
-                        'Next
+                        For k As Integer = 0 To 8
+                            For l As Integer = 0 To 3
+                                spielfeld(ZEILE_MAX - 5 - l, SpielfigurPos + k) = " "
+                            Next
+                        Next
 
                         'II Spur(en) in dem die Kollision anhand der Spielerposition erkennen und Gegner in dem Bereich des nächsten Gegners löschen
 
-                        Dim spielfigurEnde As Integer = SpielfigurPos + 8
+                        'Dim spielfigurEnde As Integer = SpielfigurPos + 8
 
-                        If SpielfigurPos Or spielfigurEnde > 0 And spielfigurEnde < 11 Then
-                            For k As Integer = 0 To 11
-                                For l As Integer = 0 To 3
-                                    spielfeld(ZEILE_MAX - 5 - l, k) = "!"
-                                Next
-                            Next
+                        'If SpielfigurPos Or spielfigurEnde <= 0 And spielfigurEnde >= 11 Then
+                        '    For k As Integer = 0 To 11
+                        '        For l As Integer = 0 To 3
+                        '            spielfeld(ZEILE_MAX - 5 - l, k) = "!"
+                        '        Next
+                        '    Next
 
-                        End If
+                        'End If
+
                     End If
 
                 Next
@@ -334,8 +334,8 @@ Module Module1
 
 
 
-                    'Warten
-                    Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
+                'Warten
+                Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
 
                 Next
                 'Tastaturpuffer leeren
