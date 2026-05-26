@@ -97,16 +97,16 @@ Module Module1
                 End If
 
                 Randomize()
-                    X = VBMath.Rnd
-                    If X < 0.25 Then '25% Chance auf Auto
-                        autoInSpur(i) = True
-                    Else
-                        autoInSpur(i) = False
-                    End If
+                X = VBMath.Rnd
+                If X < 0.25 Then '25% Chance auf Auto
+                    autoInSpur(i) = True
+                Else
+                    autoInSpur(i) = False
                 End If
+            End If
 
-                'Auto ausgeben wenn autoInSpur = true
-                If autoInSpur(i) = True Then
+            'Auto ausgeben wenn autoInSpur = true
+            If autoInSpur(i) = True Then
 
                 P = 1 + (12 * i)
 
@@ -118,7 +118,19 @@ Module Module1
                     Next
 
                 End If
+            End If
 
+            'Item Generierung
+            Randomize()
+            X = VBMath.Rnd
+            If X < 0.8 Then '10% Chance auf Item
+
+                P = 6 + (12 * i)
+
+                If idx = 1 OrElse idx = 2 Then
+                    Zeile(P) = "++"
+
+                End If
             End If
 
 
@@ -264,82 +276,103 @@ Module Module1
 
                 'Position der Spielfigur ermitteln
                 If Taste = CURSOR_LEFT Then
-                        SpielfigurPos -= 1
-                    End If
+                    SpielfigurPos -= 1
+                End If
 
-                    If Taste = CURSOR_RIGHT Then
-                        SpielfigurPos += 1
-                    End If
+                If Taste = CURSOR_RIGHT Then
+                    SpielfigurPos += 1
+                End If
 
-                    'Begrenzung der Spielfigur auf dem Spielfeld
-                    If SpielfigurPos < 0 Then
-                        SpielfigurPos = 0
-                    End If
+                'Begrenzung der Spielfigur auf dem Spielfeld
+                If SpielfigurPos < 0 Then
+                    SpielfigurPos = 0
+                End If
 
-                    If SpielfigurPos > SPALTE_MAX Then
-                        SpielfigurPos = SPALTE_MAX
-                    End If
+                If SpielfigurPos > SPALTE_MAX Then
+                    SpielfigurPos = SPALTE_MAX
+                End If
 
                 'Kollisionserkennung
 
                 For h As Integer = 1 To 8
-                    If spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = " " Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "|" Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = Chr(0) Then
+                    If spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = " " Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "|" Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = Chr(0) Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "+" Then
                         'Keine Kollision
 
+
+                    ElseIf spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "+" Then 'Item Kollision wird erkannt, zufällig wird ausgewählt welches von 4 Items es ist, jedes item ist unterschiedlich lange aktiv
+                        'Zufäälige Zahl zwischen 1 udn 4 generieren um Item auszuwählen
+                        Dim item As Integer
+
+                        Randomize()
+                        item = Int((4 - 1 + 1) * VBMath.Rnd + 1)
+
+                        If item = 1 Then 'Unverwundbarkeit für 10 sekunden
+
+                        ElseIf item = 2 Then 'Speedboost (das Spiel läuft für 10 Sekunden schneller, Wartezeit wird um 50% reduziert)
+
+                        ElseIf item = 3 Then 'Bier (für 10 Sekunden werden die Kontrollen vertauscht)
+
+
+                        Else 'Extra Leben
+                            leben = leben + 1
+
+                        End If
+
+                    End If
                     Else
 
                         'Leben abziehen
                         leben = leben - 1
-                        Console.Beep()
+                                Console.Beep()
 
-                        'Zwei Varianten zum Entfernen des Hindernisses nach Kontakt
-                        'i Bereich in der Größe eines Gegners "über" der Spielfigur löschen --> Nachteil: Gegner können "zerschnitten" werden
+                            'Zwei Varianten zum Entfernen des Hindernisses nach Kontakt
+                            'i Bereich in der Größe eines Gegners "über" der Spielfigur löschen --> Nachteil: Gegner können "zerschnitten" werden
 
-                        For k As Integer = 0 To 8
-                            For l As Integer = 0 To 3
-                                spielfeld(ZEILE_MAX - 5 - l, SpielfigurPos + k) = " "
+                            For k As Integer = 0 To 8
+                                For l As Integer = 0 To 3
+                                    spielfeld(ZEILE_MAX - 5 - l, SpielfigurPos + k) = " "
+                                Next
                             Next
-                        Next
 
-                        'II Spur(en) in dem die Kollision anhand der Spielerposition erkennen und Gegner in dem Bereich des nächsten Gegners löschen
+                            'II Spur(en) in dem die Kollision anhand der Spielerposition erkennen und Gegner in dem Bereich des nächsten Gegners löschen
 
-                        'Dim spielfigurEnde As Integer = SpielfigurPos + 8
+                            'Dim spielfigurEnde As Integer = SpielfigurPos + 8
 
-                        'If SpielfigurPos Or spielfigurEnde <= 0 And spielfigurEnde >= 11 Then
-                        '    For k As Integer = 0 To 11
-                        '        For l As Integer = 0 To 3
-                        '            spielfeld(ZEILE_MAX - 5 - l, k) = "!"
-                        '        Next
-                        '    Next
+                            'If SpielfigurPos Or spielfigurEnde <= 0 And spielfigurEnde >= 11 Then
+                            '    For k As Integer = 0 To 11
+                            '        For l As Integer = 0 To 3
+                            '            spielfeld(ZEILE_MAX - 5 - l, k) = "!"
+                            '        Next
+                            '    Next
 
-                        'End If
+                            'End If
 
-                    End If
+                        End If
 
                 Next
 
                 'Spielfigur auf der Konsole ausgeben
                 Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 1)
-                    Console.Write("`'   `'")
-                    Console.SetCursorPosition(SpielfigurPos + 0, ZEILE_MAX - 2)
-                    Console.Write("(0[###]0)")
-                    Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 3)
-                    Console.Write("/_..._\")
-                    Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 4)
-                    Console.Write("_____")
+                Console.Write("`'   `'")
+                Console.SetCursorPosition(SpielfigurPos + 0, ZEILE_MAX - 2)
+                Console.Write("(0[###]0)")
+                Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 3)
+                Console.Write("/_..._\")
+                Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 4)
+                Console.Write("_____")
 
-                    'Anzeige der Leben
-                    Console.SetCursorPosition(0, ZEILE_MAX)
-                    Console.Write("Leben: " & leben)
+                'Anzeige der Leben
+                Console.SetCursorPosition(0, ZEILE_MAX)
+                Console.Write("Leben: " & leben)
 
 
 
                 'Warten
                 Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
 
-                Next
-                'Tastaturpuffer leeren
-                Do
+            Next
+            'Tastaturpuffer leeren
+            Do
                 Taste = Tastatur_Abfrage()
             Loop Until Taste = NO_KEY
 
