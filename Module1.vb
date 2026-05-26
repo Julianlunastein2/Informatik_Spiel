@@ -318,36 +318,36 @@ Module Module1
 
                         End If
 
-                    End If
+
                     Else
 
                         'Leben abziehen
                         leben = leben - 1
-                                Console.Beep()
+                        Console.Beep()
 
-                            'Zwei Varianten zum Entfernen des Hindernisses nach Kontakt
-                            'i Bereich in der Größe eines Gegners "über" der Spielfigur löschen --> Nachteil: Gegner können "zerschnitten" werden
+                        'Zwei Varianten zum Entfernen des Hindernisses nach Kontakt
+                        'i Bereich in der Größe eines Gegners "über" der Spielfigur löschen --> Nachteil: Gegner können "zerschnitten" werden
 
-                            For k As Integer = 0 To 8
-                                For l As Integer = 0 To 3
-                                    spielfeld(ZEILE_MAX - 5 - l, SpielfigurPos + k) = " "
-                                Next
+                        For k As Integer = 0 To 8
+                            For l As Integer = 0 To 3
+                                spielfeld(ZEILE_MAX - 5 - l, SpielfigurPos + k) = " "
                             Next
+                        Next
 
-                            'II Spur(en) in dem die Kollision anhand der Spielerposition erkennen und Gegner in dem Bereich des nächsten Gegners löschen
+                        'II Spur(en) in dem die Kollision anhand der Spielerposition erkennen und Gegner in dem Bereich des nächsten Gegners löschen
 
-                            'Dim spielfigurEnde As Integer = SpielfigurPos + 8
+                        'Dim spielfigurEnde As Integer = SpielfigurPos + 8
 
-                            'If SpielfigurPos Or spielfigurEnde <= 0 And spielfigurEnde >= 11 Then
-                            '    For k As Integer = 0 To 11
-                            '        For l As Integer = 0 To 3
-                            '            spielfeld(ZEILE_MAX - 5 - l, k) = "!"
-                            '        Next
-                            '    Next
+                        'If SpielfigurPos Or spielfigurEnde <= 0 And spielfigurEnde >= 11 Then
+                        '    For k As Integer = 0 To 11
+                        '        For l As Integer = 0 To 3
+                        '            spielfeld(ZEILE_MAX - 5 - l, k) = "!"
+                        '        Next
+                        '    Next
 
-                            'End If
+                        'End If
 
-                        End If
+                    End If
 
                 Next
 
