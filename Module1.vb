@@ -197,7 +197,103 @@ Module Module1
                                                                  ░                   
 ")
         Console.ReadLine()
+
+        'Nach Game Over wieder normale Farben 
+
+        Console.WriteLine("Drücke Enter, um zum Hauptmenü zurückzukehren...")
+        Console.ReadLine()
+        Console.BackgroundColor = ConsoleColor.Black
+        Console.Clear()
+
     End Sub
+
+
+    '=========================================================================================================================
+    'Startmenü
+    '=========================================================================================================================
+
+    Enum Hauptmenü
+        Spielen
+        Beenden
+    End Enum
+
+    Function Startmenü() As Hauptmenü
+
+        Dim auswahl As Integer = 0
+
+        Dim optionen() As String =
+    {
+        "Spiel starten",
+        "Spiel beenden"
+    }
+
+        Do
+
+            'Bildschirm leeren
+            Console.Clear()
+
+            'Titel anzeigen
+            Console.WriteLine("Geisterfahrer")
+            Console.WriteLine()
+            'Anweisungen anzeigen
+            Console.WriteLine("Mit Pfeiltasten auswählen")
+            Console.WriteLine("Mit Enter bestätigen")
+            Console.WriteLine()
+
+            'Menüoptionen anzeigen
+            For i = 0 To optionen.Length - 1
+
+                'Aktuelle Auswahl markieren
+                If i = auswahl Then
+                    Console.WriteLine("> " & optionen(i))
+                Else
+                    Console.WriteLine("  " & optionen(i))
+                End If
+
+            Next
+
+            'Tasteneingabe lesen
+            Dim taste As ConsoleKey =
+        Console.ReadKey(True).Key
+
+            'Pfeil nach oben
+            If taste = ConsoleKey.UpArrow Then
+
+                auswahl -= 1
+
+                'Wenn über erste Option hinaus
+                If auswahl < 0 Then
+                    auswahl = optionen.Length - 1
+                End If
+
+                'Pfeil nach unten
+            ElseIf taste = ConsoleKey.DownArrow Then
+
+                auswahl += 1
+
+                'Wenn unter letzte Option hinaus
+                If auswahl >= optionen.Length Then
+                    auswahl = 0
+                End If
+
+                'Enter gedrückt
+            ElseIf taste = ConsoleKey.Enter Then
+
+                'Spiel starten
+                If auswahl = 0 Then
+                    Return Hauptmenü.Spielen
+
+                    'Spiel beenden
+                Else
+                    Return Hauptmenü.Beenden
+                End If
+
+            End If
+
+        Loop
+
+    End Function
+
 
     '=========================================================================================================================
     'Grundlegender Spielablauf
@@ -220,7 +316,7 @@ Module Module1
         Dim spawnCooldown As Integer = 0 'Cooldown um zu verhindern dass in jeder Zeile ein Auto spawnt, eleminiert langweilige Optik von einem "Block" Gegner
 
         'Startwerte setzen
-        leben = 5
+        leben = 1
         SpielfigurPos = SPALTE_MAX / 2
         Wartezeit = 200
         a_max = A_MAX_START
@@ -403,11 +499,31 @@ Module Module1
     '=========================================================================================================================
 
     Sub Main()
+
         Console.CursorVisible = False
 
-        Spielablauf()
+        'AUsfüh´rung je nachdem ob Beenden oder Starten gewählt wurde
 
+        Dim aktion As Hauptmenü
 
+        Do
+
+            aktion = Startmenü()
+
+            If aktion = Hauptmenü.Spielen Then
+
+                Spielablauf()
+
+            ElseIf aktion = Hauptmenü.Beenden Then
+
+                Exit Do
+
+            End If
+
+        Loop
+
+        Console.Clear()
+        Console.WriteLine("Spiel beendet.")
 
     End Sub
 
