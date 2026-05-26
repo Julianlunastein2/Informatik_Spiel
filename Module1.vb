@@ -295,7 +295,7 @@ Module Module1
                 'Kollisionserkennung
 
                 For h As Integer = 1 To 8
-                    If spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = " " Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "|" Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = Chr(0) Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "+" Then
+                    If spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = " " Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "|" Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = Chr(0) Then
                         'Keine Kollision
 
 
@@ -315,9 +315,8 @@ Module Module1
 
                         Else 'Extra Leben
                             leben = leben + 1
-
                         End If
-
+                        Console.WriteLine("Item: " & item)
 
                     Else
 
