@@ -346,7 +346,7 @@ Module Module1
         Dim unverwundbar As DateTime = DateTime.MinValue 'Variable um die Dauer der Unverwundbarkeit zu speichern
 
         'Startwerte setzen
-        leben = 1
+        leben = 5
         SpielfigurPos = SPALTE_MAX / 2
         Wartezeit = 200
         a_max = A_MAX_START
@@ -540,9 +540,13 @@ Module Module1
 
                 'Anzeige der Leben
                 Console.SetCursorPosition(0, ZEILE_MAX)
-                Console.Write("Leben: " & leben)
-
-
+                If DateTime.Now < unverwundbar Then
+                    Console.Write("Leben: " & leben & " Unverwundbar")
+                    Console.ForegroundColor = ConsoleColor.Yellow
+                Else
+                    Console.Write("Leben: " & leben & "                  ")
+                    Console.ForegroundColor = ConsoleColor.White
+                End If
 
                 'Warten
                 Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
