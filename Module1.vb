@@ -223,101 +223,108 @@ Module Module1
 
     Enum Hauptmenü
         Spielen
+        Schwierigkeit
+        Scoreboard
+        AutoOptik
         Beenden
     End Enum
 
     Function Startmenü() As Hauptmenü
 
         Dim auswahl As Integer = 0
+        Dim optionen() As String = {"SPIEL STARTEN", "SCHWIERIGKEIT", "SCOREBOARD", "AUTO OPTIK", "SPIEL BEENDEN"}
 
-        Dim optionen() As String =
-    {
-        "Spiel starten",
-        "Spiel beenden"
-    }
+        ' Dein ASCII-Schriftzug zeilenweise im Array hinterlegt
+        Dim logo() As String = {
+            " ░▒▓██████▓▒░░▒▓████████▓▒░▒▓█▓▒░░▒▓███████▓▒░▒▓████████▓▒░▒▓████████▓▒░▒▓███████▓▒░░▒▓████████▓▒░▒▓██████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░▒▓███████▓▒░ ",
+            "░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░         ░▒▓█▓▒░   ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░       ░▒▓█▓▒░░▒▓█▓▒░ ",
+            "░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░         ░▒▓█▓▒░   ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░       ░▒▓█▓▒░░▒▓█▓▒░ ",
+            "░▒▓█▓▒▒▓███▓▒░▒▓██████▓▒░ ░▒▓█▓▒░░▒▓██████▓▒░   ░▒▓█▓▒░   ░▒▓██████▓▒░ ░▒▓███████▓▒░░▒▓██████▓▒░░▒▓████████▓▒░▒▓████████▓▒░▒▓██████▓▒░ ░▒▓███████▓▒░ ",
+            "░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░       ░▒▓█▓▒░░▒▓█▓▒░ ",
+            "░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░       ░▒▓█▓▒░░▒▓█▓▒░ ",
+            " ░▒▓██████▓▒░░▒▓████████▓▒░▒▓█▓▒░▒▓███████▓▒░   ░▒▓█▓▒░   ░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░ "
+        }
+
+        Dim credits As String = "by Noah, Jonas und Julian"
+
+        ' Da das Logo 152 Zeichen breit ist, passen wir das Konsolenfenster dynamisch an,
+        ' damit es zu keinen unschönen Zeilenumbrüchen kommt.
+        Dim benötigteBreite As Integer = logo(0).Length + 4
+        If Console.WindowWidth < benötigteBreite Then
+            Console.WindowWidth = benötigteBreite
+        End If
 
         Do
-
-            'Bildschirm leeren
             Console.Clear()
+            Console.ForegroundColor = ConsoleColor.White
 
-            'Titel anzeigen
-            Console.WriteLine("Geisterfahrer")
+            ' 1. LOGO AUSGEBEN UND HORIZONTAL ZENTRIEREN
             Console.WriteLine()
-            'Anweisungen anzeigen
-            Console.WriteLine("Mit Pfeiltasten auswählen")
-            Console.WriteLine("Mit Enter bestätigen")
             Console.WriteLine()
-
-            'Menüoptionen anzeigen
-            For i As Integer = 0 To optionen.Length - 1
-
-                'Aktuelle Auswahl markieren
-                If i = auswahl Then
-                    Console.WriteLine("> " & optionen(i))
-                Else
-                    Console.WriteLine("  " & optionen(i))
-                End If
-
+            For i As Integer = 0 To logo.Length - 1
+                Dim xPosLogo As Integer = (Console.WindowWidth - logo(i).Length) / 2
+                Console.SetCursorPosition(xPosLogo, 2 + i)
+                Console.Write(logo(i))
             Next
 
-            'Tasteneingabe lesen
-            Dim taste As ConsoleKey =
-        Console.ReadKey(True).Key
+            ' 2. CREDITS DIREKT DARUNTER ZENTRIEREN
+            Console.WriteLine()
+            Dim xPosCredits As Integer = (Console.WindowWidth - credits.Length) / 2
+            Console.SetCursorPosition(xPosCredits, 2 + logo.Length + 1)
+            Console.ForegroundColor = ConsoleColor.Gray
+            Console.Write(credits)
+            Console.ForegroundColor = ConsoleColor.White
 
-            'Erkennung des augewählten Menüpunktes
+            ' 3. MENÜPUNKTE MITTIG POSITIONIEREN
+            ' Wir starten ein paar Zeilen unter den Credits
+            Dim startZeileMenü As Integer = 2 + logo.Length + 5
+
+            For i As Integer = 0 To optionen.Length - 1
+                Dim optText As String = optionen(i)
+
+                ' Wenn der Punkt ausgewählt ist, fügen wir die Arcade-Pfeile hinzu
+                If i = auswahl Then
+                    optText = "   > " & optText & " <   "
+                    Console.ForegroundColor = ConsoleColor.DarkYellow ' Microsofts Standard-Kombination für Orange
+                Else
+                    optText = "     " & optText & "     "
+                    Console.ForegroundColor = ConsoleColor.White
+                End If
+
+                ' Berechne die Mitte basierend auf der aktuellen Fensterbreite
+                Dim xPosOption As Integer = (Console.WindowWidth - optText.Length) / 2
+                Console.SetCursorPosition(xPosOption, startZeileMenü + (i * 2)) ' (i * 2) sorgt für Leerzeilen zwischen den Punkten
+                Console.Write(optText)
+            Next
+
+            ' Steuerungshinweis ganz unten zentriert platzieren
+            Dim steuerung As String = "[ Mit Pfeiltasten steuern & Enter bestätigen ]"
+            Dim xPosSteuerung As Integer = (Console.WindowWidth - steuerung.Length) / 2
+            Console.SetCursorPosition(xPosSteuerung, Console.WindowHeight - 3)
+            Console.ForegroundColor = ConsoleColor.DarkGray
+            Console.Write(steuerung)
+
+            ' Tasteneingabe lesen
+            Dim taste As ConsoleKey = Console.ReadKey(True).Key
+
+            ' Menü-Navigation per Pfeiltasten
             Select Case taste
                 Case ConsoleKey.UpArrow
                     auswahl -= 1
-                    If auswahl < 0 Then
-                        auswahl = optionen.Length - 1
-                    End If
+                    If auswahl < 0 Then auswahl = optionen.Length - 1
                 Case ConsoleKey.DownArrow
                     auswahl += 1
-                    If auswahl >= optionen.Length Then
-                        auswahl = 0
-                    End If
+                    If auswahl >= optionen.Length Then auswahl = 0
                 Case ConsoleKey.Enter
-                    If auswahl = 0 Then
-                        Return Hauptmenü.Spielen
-                    Else
-                        Return Hauptmenü.Beenden
-                    End If
+                    ' Rückgabewerte passend zu deinem Enum mappen
+                    Select Case auswahl
+                        Case 0 : Return Hauptmenü.Spielen
+                        Case 1 : Return Hauptmenü.Schwierigkeit
+                        Case 2 : Return Hauptmenü.Scoreboard
+                        Case 3 : Return Hauptmenü.AutoOptik
+                        Case 4 : Return Hauptmenü.Beenden
+                    End Select
             End Select
-
-            ''Pfeil nach oben
-            'If taste = ConsoleKey.UpArrow Then
-
-            '    auswahl -= 1
-
-            '    'Wenn über erste Option hinaus
-            '    If auswahl < 0 Then
-            '        auswahl = optionen.Length - 1
-            '    End If
-
-            '    'Pfeil nach unten
-            'ElseIf taste = ConsoleKey.DownArrow Then
-
-            '    auswahl += 1
-
-            '    'Wenn unter letzte Option hinaus
-            '    If auswahl >= optionen.Length Then
-            '        auswahl = 0
-            '    End If
-
-            '    'Enter gedrückt
-            'ElseIf taste = ConsoleKey.Enter Then
-
-            '    'Spiel starten
-            '    If auswahl = 0 Then
-            '        Return Hauptmenü.Spielen
-
-            '        'Spiel beenden
-            '    Else
-            '        Return Hauptmenü.Beenden
-            '    End If
-
-            'End If
 
         Loop
 
