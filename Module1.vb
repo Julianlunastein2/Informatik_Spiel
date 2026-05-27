@@ -344,6 +344,8 @@ Module Module1
         Dim autoInSpur(4) As Boolean 'Variable um zu entscheiden ob ein Auto in der Spur ist oder nicht, damit es nicht in jeder Zeile ein Auto gibt
         Dim spawnCooldown As Integer = 0 'Cooldown um zu verhindern dass in jeder Zeile ein Auto spawnt, eleminiert langweilige Optik von einem "Block" Gegner
         Dim unverwundbar As DateTime = DateTime.MinValue 'Variable um die Dauer der Unverwundbarkeit zu speichern
+        Dim item As Integer
+
 
         'Startwerte setzen
         leben = 5
@@ -423,51 +425,36 @@ Module Module1
 
 
                 'Kollisionserkennung
+                For f As Integer = 1 To 4
+                    For h As Integer = 1 To 8
+                        Dim symbol As Char = spielfeld(ZEILE_MAX - f, SpielfigurPos + h)
 
-                For h As Integer = 1 To 8
-                    If spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = " " Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "|" Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = Chr(0) Then
-                        'Keine Kollision
+                        If symbol = " " Or symbol = "|" Or symbol = Chr(0) Then
+                            'Keine Kollision
 
-                    ElseIf spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "+" Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "B" Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "*" Then 'Item Kollision erkannt
-                        Dim item As Integer
-                        Dim symbol As Char = spielfeld(ZEILE_MAX - 5, SpielfigurPos + h)
+                        ElseIf symbol = "+" Then
 
-                        If symbol = "+"c Then
-                            'Für + wie zuvor: zufälliges Item zwischen 1 und 4
-                            Randomize()
-                            item = Int((4 - 1 + 1) * VBMath.Rnd + 1)
-                        ElseIf symbol = "B"c Then
-                            'Bier -> Item 3 (Kontrollen vertauscht)
-                            item = 3
-                        ElseIf symbol = "*"c Then
-                            'Stern -> Unverwundbarkeit (Item 1)
-                            item = 1
-                        ElseIf symbol = "S"c Then
-                            'Speed Boost -> Item 2
-                            item = 2
-                        Else
-                            item = 0
-                        End If
-
-                        'Item-Effekt anwenden
-                        If item = 1 Then 'Unverwundbarkeit für 10 Sekunden
-                            Unverwundbar = DateTime.Now.AddSeconds(10)
-                        ElseIf item = 2 Then 'Speedboost (das Spiel läuft für 10 Sekunden schneller, Wartezeit wird um 50% reduziert)
-
-                        ElseIf item = 3 Then 'Bier (für 10 Sekunden werden die Kontrollen vertauscht)
-
-                        ElseIf item = 4 Then 'Extra Leben
                             leben = leben + 1
-                        End If
 
-                        'Item entfernen, damit es nicht erneut aufgenommen wird
-                        spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = " "
-                        Console.WriteLine("Item: " & item)
+                        ElseIf symbol = "B" Then
+                            'Bier -> Item 3 (Kontrollen vertauscht)
 
-                    Else
 
-                        'Kollision mit Hindernis
-                        If DateTime.Now < Unverwundbar Then
+                        ElseIf symbol = "*" Then
+                            'Stern -> Unverwundbarkeit (Item 1)
+                            unverwundbar = DateTime.Now.AddSeconds(10)
+
+                        ElseIf symbol = "S" Then
+                            'Speed Boost -> Item 2
+
+                            'Item entfernen, damit es nicht erneut aufgenommen wird
+                            symbol = " "
+                            Console.WriteLine("Item: " & item)
+
+
+
+                            'Kollision mit Hindernis
+                        ElseIf DateTime.Now < unverwundbar Then
                             'Unverwundbar: keine Lebensabzüge, Hindernis entfernen (Spieler fährt durch)
                             For k As Integer = 0 To 8
                                 For l As Integer = 0 To 3
@@ -509,51 +496,51 @@ Module Module1
                                     spielfeld(ZEILE_MAX - 5 - l, SpielfigurPos + k) = " "
                                 Next
                             Next
+
+                            'II Spur(en) in dem die Kollision anhand der Spielerposition erkennen und Gegner in dem Bereich des nächsten Gegners löschen
+
+                            'Dim spielfigurEnde As Integer = SpielfigurPos + 8
+
+                            'If SpielfigurPos Or spielfigurEnde <= 0 And spielfigurEnde >= 11 Then
+                            '    For k As Integer = 0 To 11
+                            '        For l As Integer = 0 To 3
+                            '            spielfeld(ZEILE_MAX - 5 - l, k) = "!"
+                            '        Next
+                            '    Next
+
+                            'End If
+
+
                         End If
-
-                        'II Spur(en) in dem die Kollision anhand der Spielerposition erkennen und Gegner in dem Bereich des nächsten Gegners löschen
-
-                        'Dim spielfigurEnde As Integer = SpielfigurPos + 8
-
-                        'If SpielfigurPos Or spielfigurEnde <= 0 And spielfigurEnde >= 11 Then
-                        '    For k As Integer = 0 To 11
-                        '        For l As Integer = 0 To 3
-                        '            spielfeld(ZEILE_MAX - 5 - l, k) = "!"
-                        '        Next
-                        '    Next
-
-                        'End If
-
-                    End If
-
+                    Next
                 Next
 
                 'Spielfigur auf der Konsole ausgeben
                 Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 1)
-                Console.Write("`'   `'")
-                Console.SetCursorPosition(SpielfigurPos + 0, ZEILE_MAX - 2)
-                Console.Write("(0[###]0)")
-                Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 3)
-                Console.Write("/_..._\")
-                Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 4)
-                Console.Write("_____")
+                    Console.Write("`'   `'")
+                    Console.SetCursorPosition(SpielfigurPos + 0, ZEILE_MAX - 2)
+                    Console.Write("(0[###]0)")
+                    Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 3)
+                    Console.Write("/_..._\")
+                    Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 4)
+                    Console.Write("_____")
 
-                'Anzeige der Leben
-                Console.SetCursorPosition(0, ZEILE_MAX)
-                If DateTime.Now < unverwundbar Then
-                    Console.Write("Leben: " & leben & " Unverwundbar")
-                    Console.ForegroundColor = ConsoleColor.Yellow
-                Else
-                    Console.Write("Leben: " & leben & "                  ")
-                    Console.ForegroundColor = ConsoleColor.White
-                End If
+                    'Anzeige der Leben
+                    Console.SetCursorPosition(0, ZEILE_MAX)
+                    If DateTime.Now < unverwundbar Then
+                        Console.Write("Leben: " & leben & " Unverwundbar")
+                        Console.ForegroundColor = ConsoleColor.Yellow
+                    Else
+                        Console.Write("Leben: " & leben & "                  ")
+                        Console.ForegroundColor = ConsoleColor.White
+                    End If
 
-                'Warten
-                Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
+                    'Warten
+                    Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
 
-            Next
-            'Tastaturpuffer leeren
-            Do
+                Next
+                'Tastaturpuffer leeren
+                Do
                 Taste = Tastatur_Abfrage()
             Loop Until Taste = NO_KEY
 
@@ -598,6 +585,7 @@ Module Module1
 
             If aktion = Hauptmenü.Spielen Then
 
+                Console.Clear()
                 Spielablauf()
 
             ElseIf aktion = Hauptmenü.Beenden Then
