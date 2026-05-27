@@ -7,7 +7,9 @@ Module Module1
     Const CURSOR_LEFT = 1
     Const CURSOR_RIGHT = 2
     Const UNKNOWN_KEY = 99
-    Const SPALTE_MAX = 60
+    Const SPUREN_ANZAHL = 7     'Variabel um die Anzahl der Spuren einzustellen
+    Const SPUR_BREITE = 12
+    Const SPALTE_MAX = SPUREN_ANZAHL * SPUR_BREITE
     Const ZEILE_MAX = 24
     Const A_MIN = 1
     Const A_MAX_START = 2
@@ -69,11 +71,11 @@ Module Module1
         'Console.WriteLine(A)
 
         'Für jeden der A Hindernisblocks:
-        For i = 0 To 4
+        For i = 0 To SPUREN_ANZAHL - 1 'Ändern zu SPUREN_ANZAHL, damit die Anzahl der Spuren variabel ist
 
             'Spuren Begrenzung einfügen, alle 3 zeilen kommt kein strich
 
-            P = 0 + (12 * i)
+            P = 0 + (SPUR_BREITE * i)
 
             If idx = 1 OrElse idx = 2 Then
                 Zeile(P) = "|"
@@ -108,7 +110,7 @@ Module Module1
             'Auto ausgeben wenn autoInSpur = true
             If autoInSpur(i) = True Then
 
-                P = 1 + (12 * i)
+                P = 1 + (SPUR_BREITE * i)
 
                 'Autoförmige Hindernisse anhand des Auto-Arrays in den Zeilen, zwischen den Fahrbahnmakierungen ausgeben
                 If auto_schicht >= 0 Then
@@ -125,7 +127,7 @@ Module Module1
             X = VBMath.Rnd
             If X < 0.1 Then '10% Chance auf Item
 
-                P = 6 + (12 * i)
+                P = (SPUR_BREITE / 2) + (SPUR_BREITE * i)
 
                 If idx = 1 OrElse idx = 2 Then
                     'Zufällig entscheiden welches Item gespawnt wird: +, B (Bier) oder * (Stern) oder "S" (Speed)
@@ -348,7 +350,7 @@ Module Module1
         Dim a_max As Single
         Dim idx = 0  'Zähler für die Spurenbegrenzung
         Dim auto_schicht As Integer = 3 'Zähler für die Autoabildung
-        Dim autoInSpur(4) As Boolean 'Variable um zu entscheiden ob ein Auto in der Spur ist oder nicht, damit es nicht in jeder Zeile ein Auto gibt
+        Dim autoInSpur(SPUREN_ANZAHL - 1) As Boolean 'Variable um zu entscheiden ob ein Auto in der Spur ist oder nicht, damit es nicht in jeder Zeile ein Auto gibt
         Dim spawnCooldown As Integer = 0 'Cooldown um zu verhindern dass in jeder Zeile ein Auto spawnt, eleminiert langweilige Optik von einem "Block" Gegner
         Dim unverwundbar As DateTime = DateTime.MinValue 'Variable um die Dauer der Unverwundbarkeit zu speichern
         Dim item As Integer
@@ -469,10 +471,10 @@ Module Module1
                 ' =========================================================================================
                 If kollisionErkannt Then
 
-                    ' prüfen, welche der 5 Spuren (0 bis 4) die Spielfigur gerade berührt
-                    For i_spur As Integer = 0 To 4
-                        Dim spurStart As Integer = 1 + (12 * i_spur)
-                        Dim spurEnde As Integer = spurStart + 10 ' Ein Auto ist ca. 8-9 Zeichen breit
+                    ' prüfen, welche der x Spuren (0 bis SPUREN_ANZAHL - 1) die Spielfigur gerade berührt
+                    For i_spur As Integer = 0 To SPUREN_ANZAHL - 1
+                        Dim spurStart As Integer = 1 + (SPUR_BREITE * i_spur)
+                        Dim spurEnde As Integer = spurStart + SPUR_BREITE - 2 ' Ein Auto ist ca. 8-9 Zeichen breit
 
                         ' Wenn sich die Spielfigur (Breite 8) im Bereich dieser Spur befindet
                         If (SpielfigurPos + 8 >= spurStart) AndAlso (SpielfigurPos <= spurEnde) Then
@@ -498,30 +500,30 @@ Module Module1
 
                 'Spielfigur auf der Konsole ausgeben
                 Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 1)
-            Console.Write("`'   `'")
-            Console.SetCursorPosition(SpielfigurPos + 0, ZEILE_MAX - 2)
-            Console.Write("(0[###]0)")
-            Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 3)
-            Console.Write("/_..._\")
-            Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 4)
-            Console.Write("_____")
+                Console.Write("`'   `'")
+                Console.SetCursorPosition(SpielfigurPos + 0, ZEILE_MAX - 2)
+                Console.Write("(0[###]0)")
+                Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 3)
+                Console.Write("/_..._\")
+                Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 4)
+                Console.Write("_____")
 
-            'Anzeige der Leben
-            Console.SetCursorPosition(0, ZEILE_MAX)
-                    If DateTime.Now < unverwundbar Then
-                        Console.Write("Leben: " & leben & " Unverwundbar")
-                        Console.ForegroundColor = ConsoleColor.Yellow
-                    Else
-                        Console.Write("Leben: " & leben & "                  ")
-                        Console.ForegroundColor = ConsoleColor.White
-                    End If
+                'Anzeige der Leben
+                Console.SetCursorPosition(0, ZEILE_MAX)
+                If DateTime.Now < unverwundbar Then
+                    Console.Write("Leben: " & leben & " Unverwundbar")
+                    Console.ForegroundColor = ConsoleColor.Yellow
+                Else
+                    Console.Write("Leben: " & leben & "                  ")
+                    Console.ForegroundColor = ConsoleColor.White
+                End If
 
-                    'Warten
-                    Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
+                'Warten
+                Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
 
-                Next
-                'Tastaturpuffer leeren
-                Do
+            Next
+            'Tastaturpuffer leeren
+            Do
                 Taste = Tastatur_Abfrage()
             Loop Until Taste = NO_KEY
 
