@@ -188,7 +188,7 @@ Module Module1
     'Gameover Screen
     '=========================================================================================================================
 
-    Sub Gameover()
+    Sub Gameover(ByVal finalScore As Integer)
         Console.BackgroundColor = ConsoleColor.Red
         Console.ForegroundColor = ConsoleColor.White
         Console.Clear()
@@ -213,7 +213,9 @@ Module Module1
         'Nach Game Over wieder normale Farben 
 
         Console.WriteLine("Drücke Enter, um zum Hauptmenü zurückzukehren...")
+        Console.WriteLine("Dein finaler Punktestand: " & finalScore)
         Console.ReadLine()
+
         Console.BackgroundColor = ConsoleColor.Black
         Console.Clear()
 
@@ -361,7 +363,9 @@ Module Module1
         Dim autoInSpur(SPUREN_ANZAHL - 1) As Boolean 'Variable um zu entscheiden ob ein Auto in der Spur ist oder nicht, damit es nicht in jeder Zeile ein Auto gibt
         Dim spawnCooldown As Integer = 0 'Cooldown um zu verhindern dass in jeder Zeile ein Auto spawnt, eleminiert langweilige Optik von einem "Block" Gegner
         Dim unverwundbar As DateTime = DateTime.MinValue 'Variable um die Dauer der Unverwundbarkeit zu speichern
-        Dim bierEffektBis As DateTime = DateTime.MinValue ' Speichert, bis wann die Steuerung vertauscht ist
+        Dim bierEffektBis As DateTime = DateTime.MinValue 'Speichert, bis wann die Steuerung vertauscht ist
+        Dim speedBoostBis As DateTime = DateTime.MinValue 'Speichert, bis wann der Speedboost aktiv ist
+        Dim score As Integer = 0 'Unser Punktezähler
 
 
         'Startwerte basierend auf der Schwierigkeit setzen
@@ -513,6 +517,8 @@ Module Module1
 
                         ElseIf symbol = "S" Then
                             'Speed Boost -> Item 2
+
+                            speedBoostBis = DateTime.Now.AddSeconds(10)
                             spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
 
                             ' Wenn es kein Item, keine Leerstelle und keine Wand ist, ist es ein gegnerisches Auto
@@ -558,6 +564,9 @@ Module Module1
                         Console.BackgroundColor = ConsoleColor.Black ' Hintergrund wieder zurück auf Schwarz setzen
                         Console.Clear()
                         ' --- ROTES AUFLEUCHTEN ENDE ---
+                    Else
+                        ' Wenn der Spieler unverwundbar ist, erhält er stattdessen Punkte für das "Durchfahren" des Autos
+                        score += 10
                     End If
                 End If
 
@@ -571,18 +580,35 @@ Module Module1
                 Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 4)
                 Console.Write("_____")
 
-                'Anzeige der Leben
+                ' Anzeige der Leben, Punkte und Statuseffekte
                 Console.SetCursorPosition(0, ZEILE_MAX)
+                Dim statusText As String = ""
+
                 If DateTime.Now < unverwundbar Then
-                    Console.Write("Leben: " & leben & " Unverwundbar")
                     Console.ForegroundColor = ConsoleColor.Yellow
+                    statusText = "[ UNVERWUNDBAR ]"
+                ElseIf DateTime.Now < bierEffektBis Then
+                    Console.ForegroundColor = ConsoleColor.Green
+                    statusText = "[ STEUERUNG VERTREHT! ]"
+                ElseIf DateTime.Now < speedBoostBis Then
+                    Console.ForegroundColor = ConsoleColor.Cyan
+                    statusText = "[ SPEED BOOST (2x PUNKTE)! ]"
                 Else
-                    Console.Write("Leben: " & leben & "                  ")
                     Console.ForegroundColor = ConsoleColor.White
                 End If
 
-                'Warten
-                Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
+                ' Gibt alles sauber in einer Zeile aus und löscht alte Reste mit Leerzeichen am Ende
+                Console.Write("Leben: " & leben & " | Punkte: " & score & "   " & statusText & "                       ")
+                'Console.ForegroundColor = ConsoleColor.White
+
+                ' Warten (wird durch Speedboost beeinflusst)
+                If DateTime.Now < speedBoostBis Then
+                    ' Halbe Wartezeit = Doppelte Geschwindigkeit!
+                    Threading.Thread.Sleep((Wartezeit / SPIELFIGUR) + 0.25)
+                Else
+                    ' Normale Geschwindigkeit
+                    Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
+                End If
 
             Next
             'Tastaturpuffer leeren
@@ -602,11 +628,17 @@ Module Module1
                 a_max = a_max * 1.01
             End If
 
-
+            ' Punkte vergeben (Am Ende der Hauptschleife einfügen)
+            If DateTime.Now < speedBoostBis Then
+                score += 2 ' Doppelter Punktgewinn im Boost!
+            Else
+                score += 1 ' Normaler Punktgewinn
+            End If
 
         Loop Until leben <= 0
 
-        Gameover()
+        Gameover(score)
+
 
 
 
