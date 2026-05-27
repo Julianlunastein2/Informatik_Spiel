@@ -717,32 +717,6 @@ Module Module1
     ' Scoreboard-Logik: Laden, Speichern und Anzeigen (3 Spalten nebeneinander)
     '=========================================================================================================================
 
-    Sub ScoreboardSpeichern(ByVal dateiName As String, ByVal spielerName As String, ByVal score As Integer)
-        Dim eintraege As New List(Of String)()
-
-        ' 1. Bestehende Einträge laden, falls Datei existiert
-        If File.Exists(dateiName) Then
-            eintraege.AddRange(File.ReadAllLines(dateiName))
-        End If
-
-        ' 2. Neuen Eintrag hinzufügen
-        eintraege.Add(spielerName & " - " & score)
-
-        ' 3. Nach Score sortieren (Absteigend)
-        ' Splittet den String bei " - ", konvertiert den hinteren Teil in Integer und sortiert
-        Dim sortierteListe = eintraege.OrderByDescending(Function(x)
-                                                             Dim parts = x.Split(New String() {" - "}, StringSplitOptions.None)
-                                                             If parts.Length > 1 Then
-                                                                 Dim s As Integer
-                                                                 If Integer.TryParse(parts(1), s) Then Return s
-                                                             End If
-                                                             Return 0
-                                                         End Function).Take(10).ToList() ' Nur Top 10 behalten
-
-        ' 4. Zurück in die Datei schreiben
-        File.WriteAllLines(dateiName, sortierteListe)
-    End Sub
-
     '=========================================================================================================================
     ' Scoreboard-Logik: Laden, Speichern (nach Punkten sortiert) und Anzeigen (3 Spalten nebeneinander)
     '=========================================================================================================================
