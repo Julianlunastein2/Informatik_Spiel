@@ -423,110 +423,84 @@ Module Module1
                     SpielfigurPos = SPALTE_MAX - 8
                 End If
 
-
                 'Kollisionserkennung
+                Dim kollisionErkannt As Boolean = False
+
                 For f As Integer = 1 To 4
                     For h As Integer = 1 To 8
                         Dim symbol As Char = spielfeld(ZEILE_MAX - f, SpielfigurPos + h)
 
                         If symbol = " " Or symbol = "|" Or symbol = Chr(0) Then
-                            'Keine Kollision
+                            'Keine Kollision, weitergehen
 
                         ElseIf symbol = "+" Then
-
                             leben = leben + 1
+                            spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
 
                         ElseIf symbol = "B" Then
                             'Bier -> Item 3 (Kontrollen vertauscht)
-
+                            spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
 
                         ElseIf symbol = "*" Then
                             'Stern -> Unverwundbarkeit (Item 1)
                             unverwundbar = DateTime.Now.AddSeconds(10)
+                            spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
 
                         ElseIf symbol = "S" Then
                             'Speed Boost -> Item 2
+                            spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
 
-                            'Item entfernen, damit es nicht erneut aufgenommen wird
-                            symbol = " "
-                            Console.WriteLine("Item: " & item)
-
-
-
-                            'Kollision mit Hindernis
-                        ElseIf DateTime.Now < unverwundbar Then
-                            'Unverwundbar: keine Lebensabzüge, Hindernis entfernen (Spieler fährt durch)
-                            For k As Integer = 0 To 8
-                                For l As Integer = 0 To 3
-                                    spielfeld(ZEILE_MAX - 5 - l, SpielfigurPos + k) = " "
-                                Next
-                            Next
+                            ' Wenn es kein Item, keine Leerstelle und keine Wand ist, ist es ein gegnerisches Auto
                         Else
-
-                            'ElseIf spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "+" Then 'Item Kollision wird erkannt, zufällig wird ausgewählt welches von 4 Items es ist, jedes item ist unterschiedlich lange aktiv
-                            '    'Zufälige Zahl zwischen 1 udn 4 generieren um Item auszuwählen
-                            '    Dim item As Integer
-
-                            '    Randomize()
-                            '    item = Int((4 - 1 + 1) * VBMath.Rnd + 1)
-
-                            '    If item = 1 Then 'Unverwundbarkeit für 10 sekunden
-
-                            '    ElseIf item = 2 Then 'Speedboost (das Spiel läuft für 10 Sekunden schneller, Wartezeit wird um 50% reduziert)
-
-                            '    ElseIf item = 3 Then 'Bier (für 10 Sekunden werden die Kontrollen vertauscht)
-
-
-                            '    Else 'Extra Leben
-                            '        leben = leben + 1
-                            '    End If
-                            '    Console.WriteLine("Item: " & item)
-
-
-
-                            'Leben abziehen
-                            leben = leben - 1
-                            Console.Beep()
-
-                            'Zwei Varianten zum Entfernen des Hindernisses nach Kontakt
-                            'i Bereich in der Größe eines Gegners "über" der Spielfigur löschen --> Nachteil: Gegner können "zerschnitten" werden
-
-                            For k As Integer = 0 To 8
-                                For l As Integer = 0 To 3
-                                    spielfeld(ZEILE_MAX - 5 - l, SpielfigurPos + k) = " "
-                                Next
-                            Next
-
-                            'II Spur(en) in dem die Kollision anhand der Spielerposition erkennen und Gegner in dem Bereich des nächsten Gegners löschen
-
-                            'Dim spielfigurEnde As Integer = SpielfigurPos + 8
-
-                            'If SpielfigurPos Or spielfigurEnde <= 0 And spielfigurEnde >= 11 Then
-                            '    For k As Integer = 0 To 11
-                            '        For l As Integer = 0 To 3
-                            '            spielfeld(ZEILE_MAX - 5 - l, k) = "!"
-                            '        Next
-                            '    Next
-
-                            'End If
-
-
+                            kollisionErkannt = True
                         End If
                     Next
                 Next
 
+                ' =========================================================================================
+                ' Spurbasierte Löschung bei Crash (erwischt Autos oben drüber, links & rechts)
+                ' =========================================================================================
+                If kollisionErkannt Then
+
+                    ' prüfen, welche der 5 Spuren (0 bis 4) die Spielfigur gerade berührt
+                    For i_spur As Integer = 0 To 4
+                        Dim spurStart As Integer = 1 + (12 * i_spur)
+                        Dim spurEnde As Integer = spurStart + 10 ' Ein Auto ist ca. 8-9 Zeichen breit
+
+                        ' Wenn sich die Spielfigur (Breite 8) im Bereich dieser Spur befindet
+                        If (SpielfigurPos + 8 >= spurStart) AndAlso (SpielfigurPos <= spurEnde) Then
+
+                            ' Lösche die betroffene Spur im unteren Bereich (die untersten 8 Zeilen) komplett.
+                            For z_del As Integer = 1 To 12
+                                For s_del As Integer = spurStart To spurStart + 9
+                                    If s_del <= SPALTE_MAX Then
+                                        spielfeld(ZEILE_MAX - z_del, s_del) = " "
+                                    End If
+                                Next
+                            Next
+
+                        End If
+                    Next
+
+                    ' Schaden berechnen: Nur abziehen, wenn der Spieler NICHT unverwundbar ist
+                    If DateTime.Now >= unverwundbar Then
+                        leben = leben - 1
+                        Console.Beep()
+                    End If
+                End If
+
                 'Spielfigur auf der Konsole ausgeben
                 Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 1)
-                    Console.Write("`'   `'")
-                    Console.SetCursorPosition(SpielfigurPos + 0, ZEILE_MAX - 2)
-                    Console.Write("(0[###]0)")
-                    Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 3)
-                    Console.Write("/_..._\")
-                    Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 4)
-                    Console.Write("_____")
+            Console.Write("`'   `'")
+            Console.SetCursorPosition(SpielfigurPos + 0, ZEILE_MAX - 2)
+            Console.Write("(0[###]0)")
+            Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 3)
+            Console.Write("/_..._\")
+            Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 4)
+            Console.Write("_____")
 
-                    'Anzeige der Leben
-                    Console.SetCursorPosition(0, ZEILE_MAX)
+            'Anzeige der Leben
+            Console.SetCursorPosition(0, ZEILE_MAX)
                     If DateTime.Now < unverwundbar Then
                         Console.Write("Leben: " & leben & " Unverwundbar")
                         Console.ForegroundColor = ConsoleColor.Yellow
