@@ -7,7 +7,7 @@ Module Module1
     Const CURSOR_LEFT = 1
     Const CURSOR_RIGHT = 2
     Const UNKNOWN_KEY = 99
-    Const SPALTE_MAX = 79
+    Const SPALTE_MAX = 60
     Const ZEILE_MAX = 24
     Const A_MIN = 1
     Const A_MAX_START = 2
@@ -241,7 +241,7 @@ Module Module1
             Console.WriteLine()
 
             'Menüoptionen anzeigen
-            For i = 0 To optionen.Length - 1
+            For i As Integer = 0 To optionen.Length - 1
 
                 'Aktuelle Auswahl markieren
                 If i = auswahl Then
@@ -256,39 +256,59 @@ Module Module1
             Dim taste As ConsoleKey =
         Console.ReadKey(True).Key
 
-            'Pfeil nach oben
-            If taste = ConsoleKey.UpArrow Then
+            'Erkennung des augewählten Menüpunktes
+            Select Case taste
+                Case ConsoleKey.UpArrow
+                    auswahl -= 1
+                    If auswahl < 0 Then
+                        auswahl = optionen.Length - 1
+                    End If
+                Case ConsoleKey.DownArrow
+                    auswahl += 1
+                    If auswahl >= optionen.Length Then
+                        auswahl = 0
+                    End If
+                Case ConsoleKey.Enter
+                    If auswahl = 0 Then
+                        Return Hauptmenü.Spielen
+                    Else
+                        Return Hauptmenü.Beenden
+                    End If
+            End Select
 
-                auswahl -= 1
+            ''Pfeil nach oben
+            'If taste = ConsoleKey.UpArrow Then
 
-                'Wenn über erste Option hinaus
-                If auswahl < 0 Then
-                    auswahl = optionen.Length - 1
-                End If
+            '    auswahl -= 1
 
-                'Pfeil nach unten
-            ElseIf taste = ConsoleKey.DownArrow Then
+            '    'Wenn über erste Option hinaus
+            '    If auswahl < 0 Then
+            '        auswahl = optionen.Length - 1
+            '    End If
 
-                auswahl += 1
+            '    'Pfeil nach unten
+            'ElseIf taste = ConsoleKey.DownArrow Then
 
-                'Wenn unter letzte Option hinaus
-                If auswahl >= optionen.Length Then
-                    auswahl = 0
-                End If
+            '    auswahl += 1
 
-                'Enter gedrückt
-            ElseIf taste = ConsoleKey.Enter Then
+            '    'Wenn unter letzte Option hinaus
+            '    If auswahl >= optionen.Length Then
+            '        auswahl = 0
+            '    End If
 
-                'Spiel starten
-                If auswahl = 0 Then
-                    Return Hauptmenü.Spielen
+            '    'Enter gedrückt
+            'ElseIf taste = ConsoleKey.Enter Then
 
-                    'Spiel beenden
-                Else
-                    Return Hauptmenü.Beenden
-                End If
+            '    'Spiel starten
+            '    If auswahl = 0 Then
+            '        Return Hauptmenü.Spielen
 
-            End If
+            '        'Spiel beenden
+            '    Else
+            '        Return Hauptmenü.Beenden
+            '    End If
+
+            'End If
 
         Loop
 
@@ -314,6 +334,7 @@ Module Module1
         Dim auto_schicht As Integer = 3 'Zähler für die Autoabildung
         Dim autoInSpur(4) As Boolean 'Variable um zu entscheiden ob ein Auto in der Spur ist oder nicht, damit es nicht in jeder Zeile ein Auto gibt
         Dim spawnCooldown As Integer = 0 'Cooldown um zu verhindern dass in jeder Zeile ein Auto spawnt, eleminiert langweilige Optik von einem "Block" Gegner
+        Dim auto_rechts As Integer = SpielfigurPos + 8
 
         'Startwerte setzen
         leben = 1
@@ -384,8 +405,11 @@ Module Module1
                     SpielfigurPos = 0
                 End If
 
-                If SpielfigurPos > SPALTE_MAX Then
-                    SpielfigurPos = SPALTE_MAX
+                'If SpielfigurPos > SPALTE_MAX Then
+                '    SpielfigurPos = SPALTE_MAX
+
+                If auto_rechts > SPALTE_MAX Then
+                    SpielfigurPos = SPALTE_MAX - 9
                 End If
 
                 'Kollisionserkennung
@@ -396,7 +420,7 @@ Module Module1
 
 
                     ElseIf spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "+" Then 'Item Kollision wird erkannt, zufällig wird ausgewählt welches von 4 Items es ist, jedes item ist unterschiedlich lange aktiv
-                        'Zufäälige Zahl zwischen 1 udn 4 generieren um Item auszuwählen
+                        'Zufälige Zahl zwischen 1 udn 4 generieren um Item auszuwählen
                         Dim item As Integer
 
                         Randomize()
@@ -502,7 +526,7 @@ Module Module1
 
         Console.CursorVisible = False
 
-        'AUsfüh´rung je nachdem ob Beenden oder Starten gewählt wurde
+        'Hauptmenü anzeigen
 
         Dim aktion As Hauptmenü
 
