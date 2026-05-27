@@ -743,6 +743,36 @@ Module Module1
         File.WriteAllLines(dateiName, sortierteListe)
     End Sub
 
+    '=========================================================================================================================
+    ' Scoreboard-Logik: Laden, Speichern (nach Punkten sortiert) und Anzeigen (3 Spalten nebeneinander)
+    '=========================================================================================================================
+
+    Sub ScoreboardSpeichern(ByVal dateiName As String, ByVal spielerName As String, ByVal score As Integer)
+        Dim eintraege As New List(Of String)()
+
+        ' 1. Bestehende Einträge laden, falls die Datei schon existiert
+        If File.Exists(dateiName) Then
+            eintraege.AddRange(File.ReadAllLines(dateiName))
+        End If
+
+        ' 2. Neuen Eintrag im Format "Name - Punkte" hinzufügen
+        eintraege.Add(spielerName & " - " & score)
+
+        ' 3. Nach Punkten sortieren (Absteigend) und nur die besten 10 behalten
+        Dim sortierteTop10 = eintraege.
+            OrderByDescending(Function(zeile)
+                                  Dim teile = zeile.Split(New String() {" - "}, StringSplitOptions.None)
+                                  Dim punkte As Integer = 0
+                                  If teile.Length > 1 Then Integer.TryParse(teile(1), punkte)
+                                  Return punkte
+                              End Function).
+            Take(10).
+            ToList()
+
+        ' 4. Die saubere Top 10 zurück in die Datei schreiben
+        File.WriteAllLines(dateiName, sortierteTop10)
+    End Sub
+
     Sub ScoreboardAnzeigen()
         Console.Clear()
         Console.ForegroundColor = ConsoleColor.Cyan
@@ -751,7 +781,7 @@ Module Module1
         Console.WriteLine("=========================================================================================")
         Console.WriteLine()
 
-        ' Spaltenüberschriften mit festen X-Positionen setzen
+        ' Spaltenüberschriften positionieren
         Console.ForegroundColor = ConsoleColor.Green
         Console.SetCursorPosition(2, 4) : Console.Write("--- LEICHT ---")
         Console.ForegroundColor = ConsoleColor.Yellow
@@ -760,35 +790,38 @@ Module Module1
         Console.SetCursorPosition(62, 4) : Console.Write("--- SCHWER ---")
         Console.ForegroundColor = ConsoleColor.White
 
-        ' Dateien einlesen (Falls sie nicht existieren, bleibt das Array leer)
+        ' Alle drei Dateien einlesen (Falls sie existieren, sonst leeres Array)
         Dim leicht() As String = If(File.Exists("highscores_leicht.txt"), File.ReadAllLines("highscores_leicht.txt"), New String() {})
         Dim mittel() As String = If(File.Exists("highscores_mittel.txt"), File.ReadAllLines("highscores_mittel.txt"), New String() {})
         Dim schwer() As String = If(File.Exists("highscores_schwer.txt"), File.ReadAllLines("highscores_schwer.txt"), New String() {})
 
-        ' Herausfinden, wie lang die Schleife laufen muss (maximale Zeilenanzahl)
+        ' Herausfinden, welche Datei die meisten Einträge hat
         Dim maxEintraege As Integer = Math.Max(leicht.Length, Math.Max(mittel.Length, schwer.Length))
 
+        ' Wenn überhaupt keine Einträge existieren
         If maxEintraege = 0 Then
             Console.SetCursorPosition(2, 6)
             Console.WriteLine("Noch keine Einträge vorhanden! Fahr ein paar Rennen!")
         Else
-            ' Zeile für Zeile nebeneinander auf die Konsole drucken
-            For i As Integer = 0 To maxEintraege - 1
+            ' Zeige maximal die Top 10 Zeilen an
+            Dim zeilenAnzahl As Integer = Math.Min(maxEintraege, 10)
+
+            For i As Integer = 0 To zeilenAnzahl - 1
                 Dim startZeile As Integer = 6 + i ' Startet bei Zeile 6 der Konsole
 
-                ' Spalte 1: Leicht (X = 2)
+                ' Spalte 1: Leicht
                 If i < leicht.Length Then
                     Console.SetCursorPosition(2, startZeile)
                     Console.Write($"{i + 1}. {leicht(i)}")
                 End If
 
-                ' Spalte 2: Mittel (X = 32)
+                ' Spalte 2: Mittel
                 If i < mittel.Length Then
                     Console.SetCursorPosition(32, startZeile)
                     Console.Write($"{i + 1}. {mittel(i)}")
                 End If
 
-                ' Spalte 3: Schwer (X = 62)
+                ' Spalte 3: Schwer
                 If i < schwer.Length Then
                     Console.SetCursorPosition(62, startZeile)
                     Console.Write($"{i + 1}. {schwer(i)}")
@@ -798,7 +831,7 @@ Module Module1
 
         ' Fußzeile ausgeben
         Console.ForegroundColor = ConsoleColor.Cyan
-        Console.SetCursorPosition(0, 8 + maxEintraege)
+        Console.SetCursorPosition(0, 8 + Math.Min(maxEintraege, 10))
         Console.WriteLine("=========================================================================================")
         Console.ForegroundColor = ConsoleColor.Gray
         Console.WriteLine("[ Drücke Enter für das Hauptmenü ]")
