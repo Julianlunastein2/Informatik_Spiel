@@ -123,12 +123,24 @@ Module Module1
             'Item Generierung
             Randomize()
             X = VBMath.Rnd
-            If X < 0.8 Then '10% Chance auf Item
+            If X < 0.1 Then '10% Chance auf Item
 
                 P = 6 + (12 * i)
 
                 If idx = 1 OrElse idx = 2 Then
-                    Zeile(P) = "++"
+                    'Zufällig entscheiden welches Item gespawnt wird: +, B (Bier) oder * (Stern) oder "S" (Speed)
+                    Dim r As Single
+                    Randomize()
+                    r = VBMath.Rnd
+                    If r < 0.25 Then
+                        Zeile(P) = "+"
+                    ElseIf r < 0.5 Then
+                        Zeile(P) = "B" 'Bier
+                    ElseIf r < 0.75 Then
+                        Zeile(P) = "*" 'Stern
+                    Else
+                        Zeile(P) = "S" 'Speed Boost
+                    End If
 
                 End If
             End If
@@ -218,6 +230,7 @@ Module Module1
         Dim auto_schicht As Integer = 3 'Zähler für die Autoabildung
         Dim autoInSpur(4) As Boolean 'Variable um zu entscheiden ob ein Auto in der Spur ist oder nicht, damit es nicht in jeder Zeile ein Auto gibt
         Dim spawnCooldown As Integer = 0 'Cooldown um zu verhindern dass in jeder Zeile ein Auto spawnt, eleminiert langweilige Optik von einem "Block" Gegner
+        Dim Unverwundbar As DateTime = DateTime.MinValue 'Zeitpunkt bis wann Kollisionen ignoriert werden' kann denke ich auch mit set timer gemacht werden
 
         'Startwerte setzen
         leben = 5
@@ -299,39 +312,66 @@ Module Module1
                         'Keine Kollision
 
 
-                    ElseIf spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "+" Then 'Item Kollision wird erkannt, zufällig wird ausgewählt welches von 4 Items es ist, jedes item ist unterschiedlich lange aktiv
-                        'Zufäälige Zahl zwischen 1 udn 4 generieren um Item auszuwählen
+                    ElseIf spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "+" Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "B" Or spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = "*" Then 'Item Kollision erkannt
                         Dim item As Integer
+                        Dim symbol As Char = spielfeld(ZEILE_MAX - 5, SpielfigurPos + h)
 
-                        Randomize()
-                        item = Int((4 - 1 + 1) * VBMath.Rnd + 1)
+                        If symbol = "+"c Then
+                            'Für + wie zuvor: zufälliges Item zwischen 1 und 4
+                            Randomize()
+                            item = Int((4 - 1 + 1) * VBMath.Rnd + 1)
+                        ElseIf symbol = "B"c Then
+                            'Bier -> Item 3 (Kontrollen vertauscht)
+                            item = 3
+                        ElseIf symbol = "*"c Then
+                            'Stern -> Unverwundbarkeit (Item 1)
+                            item = 1
+                        ElseIf symbol = "S"c Then
+                            'Speed Boost -> Item 2
+                            item = 2
+                        Else
+                            item = 0
+                        End If
 
-                        If item = 1 Then 'Unverwundbarkeit für 10 sekunden
-
+                        'Item-Effekt anwenden
+                        If item = 1 Then 'Unverwundbarkeit für 10 Sekunden
+                            Unverwundbar = DateTime.Now.AddSeconds(10)
                         ElseIf item = 2 Then 'Speedboost (das Spiel läuft für 10 Sekunden schneller, Wartezeit wird um 50% reduziert)
 
                         ElseIf item = 3 Then 'Bier (für 10 Sekunden werden die Kontrollen vertauscht)
 
-
-                        Else 'Extra Leben
+                        ElseIf item = 4 Then 'Extra Leben
                             leben = leben + 1
                         End If
+
+                        'Item entfernen, damit es nicht erneut aufgenommen wird
+                        spielfeld(ZEILE_MAX - 5, SpielfigurPos + h) = " "
                         Console.WriteLine("Item: " & item)
 
                     Else
 
-                        'Leben abziehen
-                        leben = leben - 1
-                        Console.Beep()
-
-                        'Zwei Varianten zum Entfernen des Hindernisses nach Kontakt
-                        'i Bereich in der Größe eines Gegners "über" der Spielfigur löschen --> Nachteil: Gegner können "zerschnitten" werden
-
-                        For k As Integer = 0 To 8
-                            For l As Integer = 0 To 3
-                                spielfeld(ZEILE_MAX - 5 - l, SpielfigurPos + k) = " "
+                        'Kollision mit Hindernis
+                        If DateTime.Now < Unverwundbar Then
+                            'Unverwundbar: keine Lebensabzüge, Hindernis entfernen (Spieler fährt durch)
+                            For k As Integer = 0 To 8
+                                For l As Integer = 0 To 3
+                                    spielfeld(ZEILE_MAX - 5 - l, SpielfigurPos + k) = " "
+                                Next
                             Next
-                        Next
+                        Else
+                            'Leben abziehen
+                            leben = leben - 1
+                            Console.Beep()
+
+                            'Zwei Varianten zum Entfernen des Hindernisses nach Kontakt
+                            'i Bereich in der Größe eines Gegners "über" der Spielfigur löschen --> Nachteil: Gegner können "zerschnitten" werden
+
+                            For k As Integer = 0 To 8
+                                For l As Integer = 0 To 3
+                                    spielfeld(ZEILE_MAX - 5 - l, SpielfigurPos + k) = " "
+                                Next
+                            Next
+                        End If
 
                         'II Spur(en) in dem die Kollision anhand der Spielerposition erkennen und Gegner in dem Bereich des nächsten Gegners löschen
 
@@ -362,7 +402,11 @@ Module Module1
 
                 'Anzeige der Leben
                 Console.SetCursorPosition(0, ZEILE_MAX)
-                Console.Write("Leben: " & leben)
+                If DateTime.Now < Unverwundbar Then
+                    Console.Write("Leben: " & leben & "  Unverwundbar")
+                Else
+                    Console.Write("Leben: " & leben & "               ")
+                End If
 
 
 
