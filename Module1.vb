@@ -8,9 +8,12 @@ Module Module1
     Const CURSOR_LEFT = 1
     Const CURSOR_RIGHT = 2
     Const UNKNOWN_KEY = 99
-    Const SPUREN_ANZAHL = 7     'Variabel um die Anzahl der Spuren einzustellen
+    '============================================================================================
+    'Spuren Einstellungen: Hier kann die Anzahl der Spuren angepasst werden, sowie die Breite der Spuren, damit das Spiel variabler wird. 
+    Const SPUREN_ANZAHL = 15     'Variabel um die Anzahl der Spuren einzustellen
     Const SPUR_BREITE = 12
     Const SPALTE_MAX = SPUREN_ANZAHL * SPUR_BREITE
+    '===========================================================================================
     Const ZEILE_MAX = 24
     Const A_MIN = 1
     Const A_MAX_START = 2
