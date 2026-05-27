@@ -408,9 +408,10 @@ Module Module1
                 'If SpielfigurPos > SPALTE_MAX Then
                 '    SpielfigurPos = SPALTE_MAX
 
-                If auto_rechts > SPALTE_MAX Then
-                    SpielfigurPos = SPALTE_MAX - 9
+                If SpielfigurPos > SPALTE_MAX - 8 Then
+                    SpielfigurPos = SPALTE_MAX - 8
                 End If
+
 
                 'Kollisionserkennung
 
