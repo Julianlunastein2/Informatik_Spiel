@@ -1,5 +1,6 @@
 ﻿Imports System.Linq.Expressions
 Imports System.Net.Security
+Imports System.IO
 
 Module Module1
 
@@ -212,9 +213,31 @@ Module Module1
 
         'Nach Game Over wieder normale Farben 
 
-        Console.WriteLine("Drücke Enter, um zum Hauptmenü zurückzukehren...")
-        Console.WriteLine("Dein finaler Punktestand: " & finalScore)
+        Console.WriteLine("=========================================")
+        Console.WriteLine("GAME OVER! Dein finaler Punktestand: " & finalScore)
+        Console.WriteLine("=========================================")
+        Console.WriteLine()
+
+        ' Namensabfrage für das Scoreboard
+        Console.Write("Bitte gib deinen Namen ein: ")
+        Dim name As String = Console.ReadLine()
+        If String.IsNullOrWhiteSpace(name) Then name = "Unbekannt"
+
+        ' Passende Datei anhand der aktuellen Schwierigkeit wählen
+        Dim dateiName As String = ""
+        Select Case aktuelleSchwierigkeit
+            Case Schwierigkeit.Leicht : dateiName = "highscores_leicht.txt"
+            Case Schwierigkeit.Mittel : dateiName = "highscores_mittel.txt"
+            Case Schwierigkeit.Schwer : dateiName = "highscores_schwer.txt"
+        End Select
+
+        ' Scoreboard füttern
+        ScoreboardSpeichern(dateiName, name, finalScore)
+
+        Console.WriteLine()
+        Console.WriteLine("Score erfolgreich gespeichert! Drücke Enter...")
         Console.ReadLine()
+        Console.Clear()
 
         Console.BackgroundColor = ConsoleColor.Black
         Console.Clear()
@@ -437,28 +460,6 @@ Module Module1
                     Console.Write("         ")
                 Next
 
-                'Position der Spielfigur ermitteln
-                ' Position der Spielfigur ermitteln (mit Bier-Effekt-Prüfung)
-                If DateTime.Now < bierEffektBis Then
-                    ' EFFEKT AKTIV: Steuerbefehle sind vertauscht!
-                    If Taste = CURSOR_LEFT Then
-                        SpielfigurPos += 1 ' Eigentlich links gedrückt, aber Auto fährt nach RECHTS
-                    End If
-
-                    If Taste = CURSOR_RIGHT Then
-                        SpielfigurPos -= 1 ' Eigentlich rechts gedrückt, aber Auto fährt nach LINKS
-                    End If
-                Else
-                    ' NORMALER ZUSTAND: Alles wie gewohnt
-                    If Taste = CURSOR_LEFT Then
-                        SpielfigurPos -= 1
-                    End If
-
-                    If Taste = CURSOR_RIGHT Then
-                        SpielfigurPos += 1
-                    End If
-                End If
-
                 ' Position der Spielfigur ermitteln (mit Bier-Effekt-Prüfung)
                 If DateTime.Now < bierEffektBis Then
                     ' EFFEKT AKTIV: Steuerbefehle sind vertauscht!
@@ -604,7 +605,7 @@ Module Module1
                 ' Warten (wird durch Speedboost beeinflusst)
                 If DateTime.Now < speedBoostBis Then
                     ' Halbe Wartezeit = Doppelte Geschwindigkeit!
-                    Threading.Thread.Sleep((Wartezeit / SPIELFIGUR) + 0.25)
+                    Threading.Thread.Sleep((Wartezeit / SPIELFIGUR) * 0.25)
                 Else
                     ' Normale Geschwindigkeit
                     Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
@@ -712,7 +713,97 @@ Module Module1
         Console.Clear()
     End Sub
 
+    '=========================================================================================================================
+    ' Scoreboard-Logik: Laden, Speichern und Anzeigen (3 Spalten nebeneinander)
+    '=========================================================================================================================
 
+    Sub ScoreboardSpeichern(ByVal dateiName As String, ByVal spielerName As String, ByVal score As Integer)
+        Dim eintraege As New List(Of String)()
+
+        ' 1. Bestehende Einträge laden, falls Datei existiert
+        If File.Exists(dateiName) Then
+            eintraege.AddRange(File.ReadAllLines(dateiName))
+        End If
+
+        ' 2. Neuen Eintrag hinzufügen
+        eintraege.Add(spielerName & " - " & score)
+
+        ' 3. Nach Score sortieren (Absteigend)
+        ' Splittet den String bei " - ", konvertiert den hinteren Teil in Integer und sortiert
+        Dim sortierteListe = eintraege.OrderByDescending(Function(x)
+                                                             Dim parts = x.Split(New String() {" - "}, StringSplitOptions.None)
+                                                             If parts.Length > 1 Then
+                                                                 Dim s As Integer
+                                                                 If Integer.TryParse(parts(1), s) Then Return s
+                                                             End If
+                                                             Return 0
+                                                         End Function).Take(10).ToList() ' Nur Top 10 behalten
+
+        ' 4. Zurück in die Datei schreiben
+        File.WriteAllLines(dateiName, sortierteListe)
+    End Sub
+
+    Sub ScoreboardAnzeigen()
+        Console.Clear()
+        Console.ForegroundColor = ConsoleColor.Cyan
+        Console.WriteLine("=========================================================================================")
+        Console.WriteLine("                                    ARCADE HIGHSCORES                                    ")
+        Console.WriteLine("=========================================================================================")
+        Console.WriteLine()
+
+        ' Spaltenüberschriften mit festen X-Positionen setzen
+        Console.ForegroundColor = ConsoleColor.Green
+        Console.SetCursorPosition(2, 4) : Console.Write("--- LEICHT ---")
+        Console.ForegroundColor = ConsoleColor.Yellow
+        Console.SetCursorPosition(32, 4) : Console.Write("--- MITTEL ---")
+        Console.ForegroundColor = ConsoleColor.Red
+        Console.SetCursorPosition(62, 4) : Console.Write("--- SCHWER ---")
+        Console.ForegroundColor = ConsoleColor.White
+
+        ' Dateien einlesen (Falls sie nicht existieren, bleibt das Array leer)
+        Dim leicht() As String = If(File.Exists("highscores_leicht.txt"), File.ReadAllLines("highscores_leicht.txt"), New String() {})
+        Dim mittel() As String = If(File.Exists("highscores_mittel.txt"), File.ReadAllLines("highscores_mittel.txt"), New String() {})
+        Dim schwer() As String = If(File.Exists("highscores_schwer.txt"), File.ReadAllLines("highscores_schwer.txt"), New String() {})
+
+        ' Herausfinden, wie lang die Schleife laufen muss (maximale Zeilenanzahl)
+        Dim maxEintraege As Integer = Math.Max(leicht.Length, Math.Max(mittel.Length, schwer.Length))
+
+        If maxEintraege = 0 Then
+            Console.SetCursorPosition(2, 6)
+            Console.WriteLine("Noch keine Einträge vorhanden! Fahr ein paar Rennen!")
+        Else
+            ' Zeile für Zeile nebeneinander auf die Konsole drucken
+            For i As Integer = 0 To maxEintraege - 1
+                Dim startZeile As Integer = 6 + i ' Startet bei Zeile 6 der Konsole
+
+                ' Spalte 1: Leicht (X = 2)
+                If i < leicht.Length Then
+                    Console.SetCursorPosition(2, startZeile)
+                    Console.Write($"{i + 1}. {leicht(i)}")
+                End If
+
+                ' Spalte 2: Mittel (X = 32)
+                If i < mittel.Length Then
+                    Console.SetCursorPosition(32, startZeile)
+                    Console.Write($"{i + 1}. {mittel(i)}")
+                End If
+
+                ' Spalte 3: Schwer (X = 62)
+                If i < schwer.Length Then
+                    Console.SetCursorPosition(62, startZeile)
+                    Console.Write($"{i + 1}. {schwer(i)}")
+                End If
+            Next
+        End If
+
+        ' Fußzeile ausgeben
+        Console.ForegroundColor = ConsoleColor.Cyan
+        Console.SetCursorPosition(0, 8 + maxEintraege)
+        Console.WriteLine("=========================================================================================")
+        Console.ForegroundColor = ConsoleColor.Gray
+        Console.WriteLine("[ Drücke Enter für das Hauptmenü ]")
+        Console.ReadLine()
+    End Sub
 
     '=========================================================================================================================
     'Sub der den Hauptablauf des Spiels steuert, von der Zeilenerzeugung über die Kollisionserkennung bis hin zum Gameover Screen
@@ -738,8 +829,10 @@ Module Module1
             ElseIf aktion = Hauptmenü.Schwierigkeit Then
                 SchwierigkeitAnpassen()
 
-            ElseIf aktion = Hauptmenü.Beenden Then
+            ElseIf aktion = Hauptmenü.Scoreboard Then
+                ScoreboardAnzeigen()
 
+            ElseIf aktion = Hauptmenü.Beenden Then
                 Exit Do
 
             End If
