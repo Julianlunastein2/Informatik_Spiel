@@ -264,6 +264,7 @@ Module Module1
     End Enum
 
     Dim aktuelleSchwierigkeit As Schwierigkeit = Schwierigkeit.Mittel
+    Dim gewaehlteAutoFarbe As ConsoleColor = ConsoleColor.White
 
     Function Startmenü() As Hauptmenü
 
@@ -571,7 +572,10 @@ Module Module1
                     End If
                 End If
 
-                'Spielfigur auf der Konsole ausgeben
+                'Spielfigur auf der Konsole ausgeben (mit Farbe)
+
+                Console.ForegroundColor = gewaehlteAutoFarbe
+
                 Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 1)
                 Console.Write("`'   `'")
                 Console.SetCursorPosition(SpielfigurPos + 0, ZEILE_MAX - 2)
@@ -580,6 +584,8 @@ Module Module1
                 Console.Write("/_..._\")
                 Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 4)
                 Console.Write("_____")
+
+                Console.ForegroundColor = ConsoleColor.White
 
                 ' Anzeige der Leben, Punkte und Statuseffekte
                 Console.SetCursorPosition(0, ZEILE_MAX)
@@ -747,6 +753,68 @@ Module Module1
         File.WriteAllLines(dateiName, sortierteTop10)
     End Sub
 
+    '=========================================================================================================================
+    ' Sub zur Auswahl der Autofarbe im Hauptmenü
+    '=========================================================================================================================
+    Sub AutoOptikAnpassen()
+        Dim farben() As ConsoleColor = {ConsoleColor.White, ConsoleColor.Red, ConsoleColor.Blue, ConsoleColor.Green, ConsoleColor.Yellow, ConsoleColor.Magenta}
+        Dim farbNamen() As String = {"Weiß", "Rot", "Blau", "Grün", "Gelb", "Magenta"}
+
+        ' Aktuelle Position in der Auswahl finden
+        Dim auswahl As Integer = Array.IndexOf(farben, gewaehlteAutoFarbe)
+        If auswahl = -1 Then auswahl = 0
+
+        Dim taste As ConsoleKey
+        Do
+            Console.Clear()
+            Console.ForegroundColor = ConsoleColor.White
+            Console.WriteLine("=====================================")
+            Console.WriteLine("          AUTO OPTIK WÄHLEN          ")
+            Console.WriteLine("=====================================")
+            Console.WriteLine()
+
+            ' Zeige die Farben nebeneinander an
+            For i As Integer = 0 To farben.Length - 1
+                If i = auswahl Then
+                    Console.ForegroundColor = farben(i)
+                    Console.Write($"> [ {farbNamen(i)} ] <  ")
+                Else
+                    Console.ForegroundColor = ConsoleColor.Gray
+                    Console.Write($"  {farbNamen(i)}    ")
+                End If
+            Next
+
+            Console.ForegroundColor = ConsoleColor.White
+            Console.WriteLine()
+            Console.WriteLine()
+            Console.WriteLine("Vorschau deines Rennwagens:")
+            Console.ForegroundColor = farben(auswahl)
+            Console.WriteLine("    _____")
+            Console.WriteLine("   /_..._\")
+            Console.WriteLine("  (0[###]0)")
+            Console.WriteLine("   `'   `'")
+
+            Console.ForegroundColor = ConsoleColor.White
+            Console.WriteLine("=====================================")
+            Console.WriteLine("[ Pfeiltasten Links/Rechts zum Ändern | Enter zum Bestätigen ]")
+
+            taste = Console.ReadKey(True).Key
+
+            If taste = ConsoleKey.LeftArrow Then
+                auswahl -= 1
+                If auswahl < 0 Then auswahl = farben.Length - 1
+            ElseIf taste = ConsoleKey.RightArrow Then
+                auswahl += 1
+                If auswahl >= farben.Length Then auswahl = 0
+            End If
+
+        Loop Until taste = ConsoleKey.Enter
+
+        ' Farbe fest speichern
+        gewaehlteAutoFarbe = farben(auswahl)
+        Console.Clear()
+    End Sub
+
     Sub ScoreboardAnzeigen()
         Console.Clear()
         Console.ForegroundColor = ConsoleColor.Cyan
@@ -838,6 +906,9 @@ Module Module1
 
             ElseIf aktion = Hauptmenü.Scoreboard Then
                 ScoreboardAnzeigen()
+
+            ElseIf aktion = Hauptmenü.AutoOptik Then
+                AutoOptikAnpassen()
 
             ElseIf aktion = Hauptmenü.Beenden Then
                 Exit Do
