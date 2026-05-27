@@ -123,13 +123,24 @@ Module Module1
             'Item Generierung
             Randomize()
             X = VBMath.Rnd
-            If X < 0.8 Then '10% Chance auf Item
+            If X < 0.1 Then '10% Chance auf Item
 
                 P = 6 + (12 * i)
 
                 If idx = 1 OrElse idx = 2 Then
-                    Zeile(P) = "++"
-
+                    'Zufällig entscheiden welches Item gespawnt wird: +, B (Bier) oder * (Stern) oder "S" (Speed)
+                    Dim r As Single
+                    Randomize()
+                    r = VBMath.Rnd
+                    If r < 0.25 Then
+                        Zeile(P) = "+"
+                    ElseIf r < 0.5 Then
+                        Zeile(P) = "B" 'Bier
+                    ElseIf r < 0.75 Then
+                        Zeile(P) = "*" 'Stern
+                    Else
+                        Zeile(P) = "S" 'Speed Boost
+                    End If
                 End If
             End If
 
