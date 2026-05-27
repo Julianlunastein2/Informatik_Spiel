@@ -50,6 +50,7 @@ Module Module1
         Dim G As Integer    'Größe des Hindernisblocks
         Dim P As Integer    'Position des Hindernisblocks
 
+
         'Auto Abbildung
         Dim Auto As String() = {"   _____",'7
                                 "  /_..._\",'8
@@ -231,6 +232,14 @@ Module Module1
         Beenden
     End Enum
 
+    Enum Schwierigkeit
+        Leicht
+        Mittel
+        Schwer
+    End Enum
+
+    Dim aktuelleSchwierigkeit As Schwierigkeit = Schwierigkeit.Mittel
+
     Function Startmenü() As Hauptmenü
 
         Dim auswahl As Integer = 0
@@ -318,7 +327,6 @@ Module Module1
                     auswahl += 1
                     If auswahl >= optionen.Length Then auswahl = 0
                 Case ConsoleKey.Enter
-                    ' Rückgabewerte passend zu deinem Enum mappen
                     Select Case auswahl
                         Case 0 : Return Hauptmenü.Spielen
                         Case 1 : Return Hauptmenü.Schwierigkeit
@@ -353,14 +361,27 @@ Module Module1
         Dim autoInSpur(SPUREN_ANZAHL - 1) As Boolean 'Variable um zu entscheiden ob ein Auto in der Spur ist oder nicht, damit es nicht in jeder Zeile ein Auto gibt
         Dim spawnCooldown As Integer = 0 'Cooldown um zu verhindern dass in jeder Zeile ein Auto spawnt, eleminiert langweilige Optik von einem "Block" Gegner
         Dim unverwundbar As DateTime = DateTime.MinValue 'Variable um die Dauer der Unverwundbarkeit zu speichern
-        Dim item As Integer
 
 
-        'Startwerte setzen
-        leben = 5
+        'Startwerte basierend auf der Schwierigkeit setzen
+        Select Case aktuelleSchwierigkeit
+            Case Schwierigkeit.Leicht
+                leben = 7          ' Mehr Leben
+                Wartezeit = 250    ' Auto fährt langsamer am Anfang
+                a_max = 1.5        ' Weniger Gegner am Anfang
+
+            Case Schwierigkeit.Mittel
+                leben = 5
+                Wartezeit = 200
+                a_max = A_MAX_START
+
+            Case Schwierigkeit.Schwer
+                leben = 3          ' Weniger Leben
+                Wartezeit = 130    ' Autos sind verdammt schnell!
+                a_max = 3.0        ' Höhere Gegnerdichte von Beginn an
+        End Select
+
         SpielfigurPos = SPALTE_MAX / 2
-        Wartezeit = 200
-        a_max = A_MAX_START
 
         'Hauptschleife des Spiels
         Do
@@ -494,7 +515,14 @@ Module Module1
                     ' Schaden berechnen: Nur abziehen, wenn der Spieler NICHT unverwundbar ist
                     If DateTime.Now >= unverwundbar Then
                         leben = leben - 1
-                        Console.Beep()
+                        ' --- ROTES AUFLEUCHTEN START ---
+                        Console.BackgroundColor = ConsoleColor.Red ' Hintergrund auf Rot setzen
+                        Console.Clear()
+                        Console.Beep()                              ' Dein Schadens-Sound
+                        Threading.Thread.Sleep(10)                  ' 50 Millisekunden warten (sehr kurzes Aufblitzen)
+                        Console.BackgroundColor = ConsoleColor.Black ' Hintergrund wieder zurück auf Schwarz setzen
+                        Console.Clear()
+                        ' --- ROTES AUFLEUCHTEN ENDE ---
                     End If
                 End If
 
@@ -549,6 +577,75 @@ Module Module1
 
     End Sub
 
+    '=========================================================================================================================
+    'Sub der die Schwierigkeit des Spiels anpasst
+    '=========================================================================================================================
+
+    Sub SchwierigkeitAnpassen()
+
+        Dim taste As ConsoleKey
+        Do
+            Console.Clear()
+            Console.ForegroundColor = ConsoleColor.White
+            Console.WriteLine("=====================================")
+            Console.WriteLine("        SCHWIERIGKEIT EINSTELLEN     ")
+            Console.WriteLine("=====================================")
+            Console.WriteLine()
+
+            ' Textfarbe auf Orange für die aktive Auswahl setzen, danach wieder auf Weiß
+            If aktuelleSchwierigkeit = Schwierigkeit.Leicht Then
+                Console.ForegroundColor = ConsoleColor.DarkYellow
+                Console.Write("  > [ LEICHT ] <")
+                Console.ForegroundColor = ConsoleColor.White
+                Console.WriteLine("    Mittel      Schwer")
+
+            ElseIf aktuelleSchwierigkeit = Schwierigkeit.Mittel Then
+                Console.Write("    Leicht    ")
+                Console.ForegroundColor = ConsoleColor.DarkYellow
+                Console.Write("> [ MITTEL ] <")
+                Console.ForegroundColor = ConsoleColor.White
+                Console.WriteLine("    Schwer")
+
+            ElseIf aktuelleSchwierigkeit = Schwierigkeit.Schwer Then
+                Console.Write("    Leicht      Mittel    ")
+                Console.ForegroundColor = ConsoleColor.DarkYellow
+                Console.WriteLine("> [ SCHWER ] <")
+                Console.ForegroundColor = ConsoleColor.White
+            End If
+
+            Console.WriteLine()
+            Console.WriteLine("=====================================")
+            Console.WriteLine("[ Pfeiltasten Links/Rechts zum Ändern")
+            Console.WriteLine("  Enter zum Bestätigen ]")
+
+            taste = Console.ReadKey(True).Key
+
+            ' KORREKTUR: Auswahl per Pfeiltasten mit ElseIf, um den Domino-Effekt zu verhindern
+            If taste = ConsoleKey.LeftArrow Then
+                If aktuelleSchwierigkeit = Schwierigkeit.Schwer Then
+                    aktuelleSchwierigkeit = Schwierigkeit.Mittel
+                ElseIf aktuelleSchwierigkeit = Schwierigkeit.Mittel Then
+                    aktuelleSchwierigkeit = Schwierigkeit.Leicht
+                ElseIf aktuelleSchwierigkeit = Schwierigkeit.Leicht Then
+                    aktuelleSchwierigkeit = Schwierigkeit.Schwer
+                End If
+
+            ElseIf taste = ConsoleKey.RightArrow Then
+                If aktuelleSchwierigkeit = Schwierigkeit.Leicht Then
+                    aktuelleSchwierigkeit = Schwierigkeit.Mittel
+                ElseIf aktuelleSchwierigkeit = Schwierigkeit.Mittel Then
+                    aktuelleSchwierigkeit = Schwierigkeit.Schwer
+                ElseIf aktuelleSchwierigkeit = Schwierigkeit.Schwer Then
+                    aktuelleSchwierigkeit = Schwierigkeit.Leicht
+                End If
+            End If
+
+        Loop Until taste = ConsoleKey.Enter
+
+        Console.Clear()
+    End Sub
+
+
 
     '=========================================================================================================================
     'Sub der den Hauptablauf des Spiels steuert, von der Zeilenerzeugung über die Kollisionserkennung bis hin zum Gameover Screen
@@ -570,6 +667,9 @@ Module Module1
 
                 Console.Clear()
                 Spielablauf()
+
+            ElseIf aktion = Hauptmenü.Schwierigkeit Then
+                SchwierigkeitAnpassen()
 
             ElseIf aktion = Hauptmenü.Beenden Then
 
