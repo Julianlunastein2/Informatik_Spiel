@@ -361,6 +361,7 @@ Module Module1
         Dim autoInSpur(SPUREN_ANZAHL - 1) As Boolean 'Variable um zu entscheiden ob ein Auto in der Spur ist oder nicht, damit es nicht in jeder Zeile ein Auto gibt
         Dim spawnCooldown As Integer = 0 'Cooldown um zu verhindern dass in jeder Zeile ein Auto spawnt, eleminiert langweilige Optik von einem "Block" Gegner
         Dim unverwundbar As DateTime = DateTime.MinValue 'Variable um die Dauer der Unverwundbarkeit zu speichern
+        Dim bierEffektBis As DateTime = DateTime.MinValue ' Speichert, bis wann die Steuerung vertauscht ist
 
 
         'Startwerte basierend auf der Schwierigkeit setzen
@@ -433,12 +434,46 @@ Module Module1
                 Next
 
                 'Position der Spielfigur ermitteln
-                If Taste = CURSOR_LEFT Then
-                    SpielfigurPos -= 1
+                ' Position der Spielfigur ermitteln (mit Bier-Effekt-Prüfung)
+                If DateTime.Now < bierEffektBis Then
+                    ' EFFEKT AKTIV: Steuerbefehle sind vertauscht!
+                    If Taste = CURSOR_LEFT Then
+                        SpielfigurPos += 1 ' Eigentlich links gedrückt, aber Auto fährt nach RECHTS
+                    End If
+
+                    If Taste = CURSOR_RIGHT Then
+                        SpielfigurPos -= 1 ' Eigentlich rechts gedrückt, aber Auto fährt nach LINKS
+                    End If
+                Else
+                    ' NORMALER ZUSTAND: Alles wie gewohnt
+                    If Taste = CURSOR_LEFT Then
+                        SpielfigurPos -= 1
+                    End If
+
+                    If Taste = CURSOR_RIGHT Then
+                        SpielfigurPos += 1
+                    End If
                 End If
 
-                If Taste = CURSOR_RIGHT Then
-                    SpielfigurPos += 1
+                ' Position der Spielfigur ermitteln (mit Bier-Effekt-Prüfung)
+                If DateTime.Now < bierEffektBis Then
+                    ' EFFEKT AKTIV: Steuerbefehle sind vertauscht!
+                    If Taste = CURSOR_LEFT Then
+                        SpielfigurPos += 1 ' Eigentlich links gedrückt, aber Auto fährt nach RECHTS
+                    End If
+
+                    If Taste = CURSOR_RIGHT Then
+                        SpielfigurPos -= 1 ' Eigentlich rechts gedrückt, aber Auto fährt nach LINKS
+                    End If
+                Else
+                    ' NORMALER ZUSTAND: Alles wie gewohnt
+                    If Taste = CURSOR_LEFT Then
+                        SpielfigurPos -= 1
+                    End If
+
+                    If Taste = CURSOR_RIGHT Then
+                        SpielfigurPos += 1
+                    End If
                 End If
 
                 'Begrenzung der Spielfigur auf dem Spielfeld
@@ -469,8 +504,8 @@ Module Module1
 
                         ElseIf symbol = "B" Then
                             'Bier -> Item 3 (Kontrollen vertauscht)
+                            bierEffektBis = DateTime.Now.AddSeconds(15) ' Effekt für 15 Sekunden aktivieren
                             spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
-
                         ElseIf symbol = "*" Then
                             'Stern -> Unverwundbarkeit (Item 1)
                             unverwundbar = DateTime.Now.AddSeconds(10)
