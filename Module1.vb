@@ -22,7 +22,7 @@ Module Module1
     Const G_Max = 9
     Const P_MIN = 0
     Const P_MAX = 79
-    Const SPIELFIGUR = 10
+    Const SPIELFIGUR = 15
 
     Function Tastatur_Abfrage() As Integer
         Dim cki As New ConsoleKeyInfo()
@@ -596,6 +596,11 @@ Module Module1
                 'Kollisionserkennung
                 Dim kollisionErkannt As Boolean = False
 
+                ' Prüfen, ob aktuell IRGENDEIN Statuseffekt aktiv ist
+                Dim effektAktiv As Boolean = (DateTime.Now < unverwundbar) OrElse
+                                             (DateTime.Now < bierEffektBis) OrElse
+                                             (DateTime.Now < speedBoostBis)
+
                 For f As Integer = 1 To 4
                     For h As Integer = 1 To 8
                         Dim symbol As Char = spielfeld(ZEILE_MAX - f, SpielfigurPos + h)
@@ -608,19 +613,28 @@ Module Module1
                             spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
 
                         ElseIf symbol = "B" Then
-                            'Bier -> Item 3 (Kontrollen vertauscht)
-                            bierEffektBis = DateTime.Now.AddSeconds(15) ' Effekt für 15 Sekunden aktivieren
-                            spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
+                            ' Nur einsammeln, wenn kein anderer Effekt aktiv ist
+                            If Not effektAktiv Then
+                                'Bier -> Item 3 (Kontrollen vertauscht)
+                                bierEffektBis = DateTime.Now.AddSeconds(15) ' Effekt für 15 Sekunden aktivieren
+                                spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
+                            End If
+
                         ElseIf symbol = "*" Then
-                            'Stern -> Unverwundbarkeit (Item 1)
-                            unverwundbar = DateTime.Now.AddSeconds(10)
-                            spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
+                            ' Nur einsammeln, wenn kein anderer Effekt aktiv ist
+                            If Not effektAktiv Then
+                                'Stern -> Unverwundbarkeit (Item 1)
+                                unverwundbar = DateTime.Now.AddSeconds(10)
+                                spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
+                            End If
 
                         ElseIf symbol = "S" Then
-                            'Speed Boost -> Item 2
-
-                            speedBoostBis = DateTime.Now.AddSeconds(10)
-                            spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
+                            ' Nur einsammeln, wenn kein anderer Effekt aktiv ist
+                            If Not effektAktiv Then
+                                'Speed Boost -> Item 2
+                                speedBoostBis = DateTime.Now.AddSeconds(10)
+                                spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
+                            End If
 
                             ' Wenn es kein Item, keine Leerstelle und keine Wand ist, ist es ein gegnerisches Auto
                         Else
