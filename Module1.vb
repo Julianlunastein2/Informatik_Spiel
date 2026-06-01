@@ -7,6 +7,7 @@ Module Module1
     Const NO_KEY = 0
     Const CURSOR_LEFT = 1
     Const CURSOR_RIGHT = 2
+    Const SPACE_BAR = 3
     Const UNKNOWN_KEY = 99
     '============================================================================================
     'Spuren Einstellungen: Hier kann die Anzahl der Spuren angepasst werden, sowie die Breite der Spuren, damit das Spiel variabler wird. 
@@ -33,6 +34,8 @@ Module Module1
                 Return CURSOR_LEFT
             ElseIf cki.Key = ConsoleKey.RightArrow Then
                 Return CURSOR_RIGHT
+            ElseIf cki.Key = ConsoleKey.Spacebar Then
+                Return SPACE_BAR
             Else
                 Return UNKNOWN_KEY
             End If
@@ -67,6 +70,11 @@ Module Module1
         For i = 0 To SPALTE_MAX
             Zeile(i) = " "
         Next
+
+        'Zeile vorher komplett füllen (verhidnert Fehler mit dem Rand
+        If idx = 1 OrElse idx = 2 Then
+            Zeile(SPALTE_MAX) = " "
+        End If
 
         'Anzahl A der Hindernisblocks zufällig ermitteln
         Randomize()
@@ -257,6 +265,7 @@ Module Module1
         Schwierigkeit
         Scoreboard
         AutoOptik
+        Anleitung
         Beenden
     End Enum
 
@@ -272,7 +281,7 @@ Module Module1
     Function Startmenü() As Hauptmenü
 
         Dim auswahl As Integer = 0
-        Dim optionen() As String = {"SPIEL STARTEN", "SCHWIERIGKEIT", "SCOREBOARD", "AUTO OPTIK", "SPIEL BEENDEN"}
+        Dim optionen() As String = {"SPIEL STARTEN", "SCHWIERIGKEIT", "SCOREBOARD", "AUTO OPTIK", "ANLEITUNG", "SPIEL BEENDEN"}
 
         ' Dein ASCII-Schriftzug zeilenweise im Array hinterlegt
         Dim logo() As String = {
@@ -361,7 +370,8 @@ Module Module1
                         Case 1 : Return Hauptmenü.Schwierigkeit
                         Case 2 : Return Hauptmenü.Scoreboard
                         Case 3 : Return Hauptmenü.AutoOptik
-                        Case 4 : Return Hauptmenü.Beenden
+                        Case 4 : Return Hauptmenü.Anleitung
+                        Case 5 : Return Hauptmenü.Beenden
                     End Select
             End Select
 
@@ -443,14 +453,56 @@ Module Module1
                 spielfeld(0, s) = Zeile(s)
             Next
 
-            'Spielfeld auf der Konsole ausgeben
+            ' --- SPIELFELD MIT RAHMEN ZEICHNEN (MIT EFFEKT-FARBEN) ---
             Console.SetCursorPosition(0, 0)
+
+            ' Hintergrundfarbe basierend auf Effekten bestimmen
+            If DateTime.Now < unverwundbar Then
+                Console.BackgroundColor = ConsoleColor.DarkYellow ' Gelber Hintergrund bei Stern
+            ElseIf DateTime.Now < bierEffektBis Then
+                Console.BackgroundColor = ConsoleColor.DarkGreen  ' Grüner Hintergrund bei Bier
+            ElseIf DateTime.Now < speedBoostBis Then
+                Console.BackgroundColor = ConsoleColor.DarkBlue   ' Blauer Hintergrund bei Boost
+            Else
+                Console.BackgroundColor = ConsoleColor.Black      ' Normal schwarz
+            End If
+
+            ' 1. Oberer Rahmen
+            Console.ForegroundColor = ConsoleColor.Cyan
+            Console.Write("╔" & New String("═"c, SPALTE_MAX + 1) & "╗")
+            Console.WriteLine()
+
+            ' 2. Spielfeld-Inhalt mit Seitenrändern
             For z = 0 To ZEILE_MAX - 2
+                Console.ForegroundColor = ConsoleColor.Cyan
+                Console.Write("║") ' Linker Rahmen
+
+                ' Inhalt zeichnen (Hintergrundfarbe bleibt aktiv)
                 For s = 0 To SPALTE_MAX
-                    Console.Write(spielfeld(z, s))
+                    If spielfeld(z, s) = "|" Then
+                        Console.ForegroundColor = ConsoleColor.DarkGray
+                        Console.Write(spielfeld(z, s))
+                    ElseIf spielfeld(z, s) = "+" OrElse spielfeld(z, s) = "B" OrElse spielfeld(z, s) = "*" OrElse spielfeld(z, s) = "S" Then
+                        Console.ForegroundColor = ConsoleColor.Yellow ' Items leuchten lassen
+                        Console.Write(spielfeld(z, s))
+                    Else
+                        Console.ForegroundColor = ConsoleColor.White
+                        Console.Write(spielfeld(z, s))
+                    End If
                 Next
-                Console.WriteLine()
+
+                Console.ForegroundColor = ConsoleColor.Cyan
+                Console.WriteLine("║") ' Rechter Rahmen
             Next
+
+            ' 3. Unterer Rahmen
+            Console.Write("╚" & New String("═"c, SPALTE_MAX + 1) & "╝")
+            Console.WriteLine()
+
+            ' Hintergrund für den Rest des Bildschirms wieder zurücksetzen
+            Console.BackgroundColor = ConsoleColor.Black
+            Console.ForegroundColor = ConsoleColor.White
+            ' --------------------------------------------------------
 
             For i = 1 To SPIELFIGUR
 
@@ -458,9 +510,31 @@ Module Module1
                 Taste = Tastatur_Abfrage()
                 'Console.WriteLine("Taste: " & Taste)
 
+                ' === PAUSENMENÜ ===
+                If Taste = SPACE_BAR Then
+                    Dim pauseStart As DateTime = DateTime.Now ' Zeit merken, wann Pause gedrückt wurde
+
+                    Dim istBetrunken As Boolean = (pauseStart < bierEffektBis)
+                    Dim istImBoost As Boolean = (pauseStart < speedBoostBis)
+
+                    Dim zumHauptmenüAbbrechen As Boolean = PausenMenüAnzeigen(score, leben, istBetrunken, istImBoost)
+
+                    If zumHauptmenüAbbrechen Then
+                        Exit Sub
+                    End If
+
+                    ' Differenz berechnen, wie lange das Spiel pausiert war
+                    Dim pauseDauer As TimeSpan = DateTime.Now - pauseStart
+
+                    ' Alle aktiven Timer um die Dauer der Pause nach hinten verschieben
+                    If unverwundbar > pauseStart Then unverwundbar = unverwundbar.Add(pauseDauer)
+                    If bierEffektBis > pauseStart Then bierEffektBis = bierEffektBis.Add(pauseDauer)
+                    If speedBoostBis > pauseStart Then speedBoostBis = speedBoostBis.Add(pauseDauer)
+                End If
+
                 'Spielfigur an alter Position löschen
                 For h As Integer = 1 To 4
-                    Console.SetCursorPosition(SpielfigurPos, ZEILE_MAX - h)
+                    Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - h)
                     Console.Write("         ")
                 Next
 
@@ -579,19 +653,19 @@ Module Module1
 
                 Console.ForegroundColor = gewaehlteAutoFarbe
 
-                Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 1)
+                Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 1)
                 Console.Write("`'   `'")
-                Console.SetCursorPosition(SpielfigurPos + 0, ZEILE_MAX - 2)
+                Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 2)
                 Console.Write("(0[###]0)")
-                Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 3)
+                Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 3)
                 Console.Write("/_..._\")
-                Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 4)
+                Console.SetCursorPosition(SpielfigurPos + 3, ZEILE_MAX - 4)
                 Console.Write("_____")
 
                 Console.ForegroundColor = ConsoleColor.White
 
                 ' Anzeige der Leben, Punkte und Statuseffekte
-                Console.SetCursorPosition(0, ZEILE_MAX)
+                Console.SetCursorPosition(0, ZEILE_MAX + 1)
                 Dim statusText As String = ""
 
                 If DateTime.Now < unverwundbar Then
@@ -883,6 +957,110 @@ Module Module1
         Console.ReadLine()
     End Sub
 
+    Sub AnleitungAnzeigen()
+        Console.Clear()
+        Console.ForegroundColor = ConsoleColor.Yellow
+        Console.WriteLine("=========================================================================================")
+        Console.WriteLine("                                         ANLEITUNG                                         ")
+        Console.WriteLine("=========================================================================================")
+        Console.WriteLine()
+        Console.ForegroundColor = ConsoleColor.White
+        Console.WriteLine("Ziel des Spiels:")
+        Console.WriteLine("Steuere deinen Wagen durch den dichten Verkehr und erreiche so viele Punkte wie möglich!")
+        Console.WriteLine()
+        Console.WriteLine("Steuerung:")
+        Console.WriteLine("- Benutze die Pfeiltasten LINKS und RECHTS, um deinen Wagen zu bewegen.")
+        Console.WriteLine("- Weiche den Autos aus und sammle Power-Ups ein!")
+        Console.WriteLine()
+        Console.WriteLine("Power-Ups:")
+        Console.WriteLine("- Stern (*) : Unverwundbarkeit für 10 Sekunden.")
+        Console.WriteLine("- Bier (B) : Vertauscht die Steuerung für 15 Sekunden (Vorsicht!).")
+        Console.WriteLine("- Speed Boost (S) : Verdoppelt deine Punktzahl für 10 Sekunden!")
+        Console.WriteLine("- Herz (+) : Gibt dir ein zusätzliches Leben.")
+        Console.WriteLine()
+        Console.WriteLine("Punktevergabe:")
+        Console.WriteLine("- Du erhältst Punkte, indem du so lange wie möglich überlebst.")
+        Console.WriteLine("- Jedes Auto, den du im unverwundbaren Zustand durchfährst, bringt zusätzliche Punkte!")
+        Console.WriteLine()
+        Console.ForegroundColor = ConsoleColor.Cyan
+        Console.WriteLine("=========================================================================================")
+        Console.ForegroundColor = ConsoleColor.Gray
+        Console.WriteLine("[ Drücke Enter für das Hauptmenü ]")
+        Console.ReadLine()
+    End Sub
+
+    '=========================================================================================================================
+    ' Funktion für das Pausenmenü 
+    '=========================================================================================================================
+    Function PausenMenüAnzeigen(ByVal aktuellerScore As Integer, ByVal aktuelleLeben As Integer, ByVal bierAktiv As Boolean, ByVal boostAktiv As Boolean) As Boolean
+        Dim auswahl As Integer = 0
+        Dim optionen() As String = {"WEITERSPIELEN", "ZURÜCK ZUM HAUPTMENÜ"}
+        Dim taste As ConsoleKey
+
+        Do
+            Console.Clear()
+            Console.ForegroundColor = ConsoleColor.Cyan
+            Console.WriteLine("=====================================")
+            Console.WriteLine("            SPIEL PAUSIERT           ")
+            Console.WriteLine("=====================================")
+            Console.ForegroundColor = ConsoleColor.White
+            Console.WriteLine()
+            Console.WriteLine($"  Aktueller Score: {aktuellerScore}")
+            Console.WriteLine($"  Verbleibende Leben: {aktuelleLeben}")
+
+            ' Zusatz-Idee: Statusanzeige in der Pause
+            Console.Write("  Status: ")
+            If boostAktiv Then
+                Console.ForegroundColor = ConsoleColor.Cyan : Console.WriteLine("[ SPEED BOOST! ]")
+            ElseIf bierAktiv Then
+                Console.ForegroundColor = ConsoleColor.Green : Console.WriteLine("[ BETRUNKEN ]")
+            Else
+                Console.ForegroundColor = ConsoleColor.Gray : Console.WriteLine("[ Normal ]")
+            End If
+
+            Console.ForegroundColor = ConsoleColor.White
+            Console.WriteLine()
+            Console.WriteLine("=====================================")
+            Console.WriteLine()
+
+            ' Optionen zeichnen
+            For i As Integer = 0 To optionen.Length - 1
+                Dim optText As String = optionen(i)
+                If i = auswahl Then
+                    optText = "   > " & optText & " <   "
+                    Console.ForegroundColor = ConsoleColor.DarkYellow
+                Else
+                    optText = "     " & optText & "     "
+                    Console.ForegroundColor = ConsoleColor.White
+                End If
+
+                Dim xPos As Integer = (37 - optText.Length) / 2 ' Zentriert im 37 Zeichen breiten Menü
+                Console.SetCursorPosition(If(xPos < 0, 0, xPos), 9 + (i * 2))
+                Console.Write(optText)
+            Next
+
+            taste = Console.ReadKey(True).Key
+            If taste = ConsoleKey.UpArrow Or taste = ConsoleKey.LeftArrow Then
+                auswahl -= 1
+                If auswahl < 0 Then auswahl = optionen.Length - 1
+            ElseIf taste = ConsoleKey.DownArrow Or taste = ConsoleKey.RightArrow Then
+                auswahl += 1
+                If auswahl >= optionen.Length Then auswahl = 0
+            ElseIf taste = ConsoleKey.Enter Then
+                If auswahl = 0 Then
+                    ' Weiterspielen
+                    Console.Clear()
+                    Return False
+                Else
+                    ' Zurück zum Hauptmenü
+                    Return True
+                End If
+            End If
+        Loop
+    End Function
+
+
+
     '=========================================================================================================================
     'Sub der den Hauptablauf des Spiels steuert, von der Zeilenerzeugung über die Kollisionserkennung bis hin zum Gameover Screen
     '=========================================================================================================================
@@ -912,6 +1090,9 @@ Module Module1
 
             ElseIf aktion = Hauptmenü.AutoOptik Then
                 AutoOptikAnpassen()
+
+            ElseIf aktion = Hauptmenü.Anleitung Then
+                AnleitungAnzeigen()
 
             ElseIf aktion = Hauptmenü.Beenden Then
                 Exit Do
