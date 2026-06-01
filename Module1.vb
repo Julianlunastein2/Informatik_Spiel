@@ -10,7 +10,7 @@ Module Module1
     Const UNKNOWN_KEY = 99
     '============================================================================================
     'Spuren Einstellungen: Hier kann die Anzahl der Spuren angepasst werden, sowie die Breite der Spuren, damit das Spiel variabler wird. 
-    Const SPUREN_ANZAHL = 15     'Variabel um die Anzahl der Spuren einzustellen
+    Const SPUREN_ANZAHL = 10     'Variabel um die Anzahl der Spuren einzustellen !!!
     Const SPUR_BREITE = 12
     Const SPALTE_MAX = SPUREN_ANZAHL * SPUR_BREITE
     '===========================================================================================
