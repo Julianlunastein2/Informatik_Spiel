@@ -453,56 +453,78 @@ Module Module1
                 spielfeld(0, s) = Zeile(s)
             Next
 
-            ' --- SPIELFELD MIT RAHMEN ZEICHNEN (MIT EFFEKT-FARBEN) ---
+            ' --- SPIELFELD MIT RAHMEN ZEICHNEN (VORDERGRUND-EFFEKTE) ---
             Console.SetCursorPosition(0, 0)
+            Console.BackgroundColor = ConsoleColor.Black ' Hintergrund bleibt immer sauber schwarz
 
-            ' Hintergrundfarbe basierend auf Effekten bestimmen
+            ' Globale Textfarbe basierend auf aktiven Effekten bestimmen
+            Dim effektFarbe As ConsoleColor = ConsoleColor.White
+
             If DateTime.Now < unverwundbar Then
-                Console.BackgroundColor = ConsoleColor.DarkYellow ' Gelber Hintergrund bei Stern
+                effektFarbe = ConsoleColor.Yellow       ' Gelber Text bei Stern (Unverwundbar)
             ElseIf DateTime.Now < bierEffektBis Then
-                Console.BackgroundColor = ConsoleColor.DarkGreen  ' Grüner Hintergrund bei Bier
+                effektFarbe = ConsoleColor.Green        ' Grüner Text bei Bier (Betrunken)
             ElseIf DateTime.Now < speedBoostBis Then
-                Console.BackgroundColor = ConsoleColor.DarkBlue   ' Blauer Hintergrund bei Boost
-            Else
-                Console.BackgroundColor = ConsoleColor.Black      ' Normal schwarz
+                effektFarbe = ConsoleColor.Cyan         ' Cyanfarbener Text bei Speed-Boost
             End If
 
-            ' 1. Oberer Rahmen
-            Console.ForegroundColor = ConsoleColor.Cyan
-            Console.Write("╔" & New String("═"c, SPALTE_MAX + 1) & "╗")
+            ' 1. Oberer Rahmen (Leuchtet in der Effektfarbe, wenn einer aktiv ist, sonst Cyan)
+            If effektFarbe <> ConsoleColor.White Then
+                Console.ForegroundColor = effektFarbe
+            Else
+                Console.ForegroundColor = ConsoleColor.Cyan
+            End If
+            Console.Write("╔" & New String("═", SPALTE_MAX + 1) & "╗")
             Console.WriteLine()
 
             ' 2. Spielfeld-Inhalt mit Seitenrändern
             For z = 0 To ZEILE_MAX - 2
-                Console.ForegroundColor = ConsoleColor.Cyan
-                Console.Write("║") ' Linker Rahmen
+                ' Linker Rahmen
+                If effektFarbe <> ConsoleColor.White Then
+                    Console.ForegroundColor = effektFarbe
+                Else
+                    Console.ForegroundColor = ConsoleColor.Cyan
+                End If
+                Console.Write("║")
 
-                ' Inhalt zeichnen (Hintergrundfarbe bleibt aktiv)
+                ' Inhalt zeichnen
                 For s = 0 To SPALTE_MAX
                     If spielfeld(z, s) = "|" Then
-                        Console.ForegroundColor = ConsoleColor.DarkGray
-                        Console.Write(spielfeld(z, s))
-                    ElseIf spielfeld(z, s) = "+" OrElse spielfeld(z, s) = "B" OrElse spielfeld(z, s) = "*" OrElse spielfeld(z, s) = "S" Then
-                        Console.ForegroundColor = ConsoleColor.Yellow ' Items leuchten lassen
+                        ' Spurmarkierungen leicht abdunkeln, außer ein Effekt ist aktiv
+                        If effektFarbe <> ConsoleColor.White Then
+                            Console.ForegroundColor = effektFarbe
+                        Else
+                            Console.ForegroundColor = ConsoleColor.DarkGray
+                        End If
                         Console.Write(spielfeld(z, s))
                     Else
-                        Console.ForegroundColor = ConsoleColor.White
+                        ' Normaler Spielinhalt (Gegner, Straße) nimmt die Effektfarbe an
+                        Console.ForegroundColor = effektFarbe
                         Console.Write(spielfeld(z, s))
                     End If
                 Next
 
-                Console.ForegroundColor = ConsoleColor.Cyan
-                Console.WriteLine("║") ' Rechter Rahmen
+                ' Rechter Rahmen
+                If effektFarbe <> ConsoleColor.White Then
+                    Console.ForegroundColor = effektFarbe
+                Else
+                    Console.ForegroundColor = ConsoleColor.Cyan
+                End If
+                Console.WriteLine("║")
             Next
 
             ' 3. Unterer Rahmen
-            Console.Write("╚" & New String("═"c, SPALTE_MAX + 1) & "╝")
+            If effektFarbe <> ConsoleColor.White Then
+                Console.ForegroundColor = effektFarbe
+            Else
+                Console.ForegroundColor = ConsoleColor.Cyan
+            End If
+            Console.Write("╚" & New String("═", SPALTE_MAX + 1) & "╝")
             Console.WriteLine()
 
-            ' Hintergrund für den Rest des Bildschirms wieder zurücksetzen
-            Console.BackgroundColor = ConsoleColor.Black
+            ' Farbe für den nachfolgenden Code zurücksetzen
             Console.ForegroundColor = ConsoleColor.White
-            ' --------------------------------------------------------
+            ' -----------------------------------------------------------
 
             For i = 1 To SPIELFIGUR
 
