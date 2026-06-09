@@ -1,4 +1,6 @@
 ﻿Imports System.IO
+Imports System.Threading
+Imports System.Runtime.InteropServices
 
 Module Module1
 
@@ -1117,11 +1119,16 @@ Module Module1
         'Hinweis auf Möglichkeit zu überspringen
         Console.ForegroundColor = ConsoleColor.Red
         Console.SetCursorPosition((breite - 34) / 2, startZeile - 2)
+        Console.WriteLine("BITTE VOR START BILDSCHIRM AUF MAXIMIEREN!")
+        Thread.Sleep(5000) ' Kurze Pause, damit der Hinweis gelesen werden kann
+        Console.SetCursorPosition((breite - 34) / 2, startZeile - 2)
+        Console.WriteLine("                                      ") ' Hinweis löschen
+        Console.SetCursorPosition((breite - 34) / 2, startZeile - 2)
         Console.WriteLine("[ Drücke eine beliebige Taste zum Überspringen ]")
+        Thread.Sleep(500) ' Kurze Pause, damit der Hinweis gelesen werden kann
         Console.ForegroundColor = ConsoleColor.White
 
-
-        Threading.Thread.Sleep(1000) ' Kurze Pause, damit der Hinweis gelesen werden kann
+        Threading.Thread.Sleep(500)
 
         ' Das Auto fährt von links nach rechts
         For x As Integer = 0 To breite + 10
