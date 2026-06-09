@@ -722,7 +722,7 @@ Module Module1
 
                 ' Saubere Ausgabe in der Statuszeile (alte Reste werden mit Leerzeichen überschrieben)
                 Console.SetCursorPosition(0, ZEILE_MAX + 1)
-                Console.Write("Leben: " & leben & " | Punkte: " & score & "   " & statusText & "                           ")
+                Console.Write("Leben: " & leben & " | Punkte: " & score & "   " & statusText & "                                                                  ")
                 Console.ForegroundColor = ConsoleColor.White
 
                 ' Warten (wird durch Speedboost beeinflusst)
@@ -835,10 +835,6 @@ Module Module1
 
         Console.Clear()
     End Sub
-
-    '=========================================================================================================================
-    ' Scoreboard-Logik: Laden, Speichern und Anzeigen (3 Spalten nebeneinander)
-    '=========================================================================================================================
 
     '=========================================================================================================================
     ' Scoreboard-Logik: Laden, Speichern (nach Punkten sortiert) und Anzeigen (3 Spalten nebeneinander)
@@ -1117,9 +1113,9 @@ Module Module1
         Dim startZeile As Integer = Console.WindowHeight / 2 - 2
         Dim aktuelleWartezeit As Integer = 100
 
-        ' Das Auto fährt von links nach rechts durch den Bildschirm
+        'Das Auto fährt von links nach rechts durch den Bildschirm
         For x As Integer = 0 To breite + 10
-            ' Alte Position überschreiben/löschen
+            'Alte Position überschreiben/löschen
             For i As Integer = 0 To auto.Length - 1
                 If x > 0 AndAlso (x - 1) < breite Then
                     Console.SetCursorPosition(x - 1, startZeile + i)
@@ -1127,7 +1123,7 @@ Module Module1
                 End If
             Next
 
-            ' Neue Position zeichnen (solange sie im Konsolenfenster liegt)
+            'Neue Position zeichnen (solange sie im Konsolenfenster liegt)
             Console.ForegroundColor = ConsoleColor.DarkYellow ' Cooler Sportwagen-Look
             For i As Integer = 0 To auto.Length - 1
                 If x < breite - auto(i).Length Then
@@ -1136,7 +1132,7 @@ Module Module1
                 End If
             Next
 
-            ' "Beschleunigungseffekt": Je weiter das Auto fährt, desto schneller wird es
+            '"Beschleunigungseffekt": Je weiter das Auto fährt, desto schneller wird es
             If x > breite * 0.3 AndAlso aktuelleWartezeit > 10 Then
                 aktuelleWartezeit = CInt(aktuelleWartezeit * 0.85)
             End If
@@ -1144,7 +1140,7 @@ Module Module1
             Threading.Thread.Sleep(aktuelleWartezeit)
         Next
 
-        ' Abrupter cooler Break / Einblenden des Titelschriftzugs
+        'Einblenden des Titelschriftzugs
         Console.Clear()
         Console.ForegroundColor = ConsoleColor.White
 
