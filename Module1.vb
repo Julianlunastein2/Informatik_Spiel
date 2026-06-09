@@ -1,6 +1,4 @@
-﻿Imports System.Linq.Expressions
-Imports System.Net.Security
-Imports System.IO
+﻿Imports System.IO
 
 Module Module1
 
@@ -700,26 +698,32 @@ Module Module1
 
                 Console.ForegroundColor = ConsoleColor.White
 
-                ' Anzeige der Leben, Punkte und Statuseffekte
-                Console.SetCursorPosition(0, ZEILE_MAX + 1)
+                'ANzeigen der Leben und Statuseffekte mit Timer
+                Dim restSekunden As Integer = 0
                 Dim statusText As String = ""
 
                 If DateTime.Now < unverwundbar Then
                     Console.ForegroundColor = ConsoleColor.Yellow
-                    statusText = "[ UNVERWUNDBAR ]"
+                    restSekunden = CInt(Math.Ceiling((unverwundbar - DateTime.Now).TotalSeconds))
+                    statusText = $"[ UNVERWUNDBAR ({restSekunden}s) ]"
+
                 ElseIf DateTime.Now < bierEffektBis Then
                     Console.ForegroundColor = ConsoleColor.Green
-                    statusText = "[ STEUERUNG VERTREHT! ]"
+                    restSekunden = CInt(Math.Ceiling((bierEffektBis - DateTime.Now).TotalSeconds))
+                    statusText = $"[ STEUERUNG VERTREHT! ({restSekunden}s) ]"
+
                 ElseIf DateTime.Now < speedBoostBis Then
                     Console.ForegroundColor = ConsoleColor.Cyan
-                    statusText = "[ SPEED BOOST (2x PUNKTE)! ]"
+                    restSekunden = CInt(Math.Ceiling((speedBoostBis - DateTime.Now).TotalSeconds))
+                    statusText = $"[ SPEED BOOST (2x PUNKTE)! ({restSekunden}s) ]"
                 Else
                     Console.ForegroundColor = ConsoleColor.White
                 End If
 
-                ' Gibt alles sauber in einer Zeile aus und löscht alte Reste mit Leerzeichen am Ende
-                Console.Write("Leben: " & leben & " | Punkte: " & score & "   " & statusText & "                       ")
-                'Console.ForegroundColor = ConsoleColor.White
+                ' Saubere Ausgabe in der Statuszeile (alte Reste werden mit Leerzeichen überschrieben)
+                Console.SetCursorPosition(0, ZEILE_MAX + 1)
+                Console.Write("Leben: " & leben & " | Punkte: " & score & "   " & statusText & "                           ")
+                Console.ForegroundColor = ConsoleColor.White
 
                 ' Warten (wird durch Speedboost beeinflusst)
                 If DateTime.Now < speedBoostBis Then
@@ -1105,6 +1109,7 @@ Module Module1
 
         Console.CursorVisible = False
 
+
         'Hauptmenü anzeigen
 
         Dim aktion As Hauptmenü
@@ -1112,6 +1117,7 @@ Module Module1
         Do
 
             aktion = Startmenü()
+
 
             If aktion = Hauptmenü.Spielen Then
 
