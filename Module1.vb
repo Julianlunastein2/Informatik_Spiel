@@ -1007,6 +1007,7 @@ Module Module1
         Console.WriteLine("Steuerung:")
         Console.WriteLine("- Benutze die Pfeiltasten LINKS und RECHTS, um deinen Wagen zu bewegen.")
         Console.WriteLine("- Weiche den Autos aus und sammle Power-Ups ein!")
+        Console.WriteLine("- Drücke -LEER- um das Spiel zu pausieren und zum Hauptmenü zurückzukehren!")
         Console.WriteLine()
         Console.WriteLine("Power-Ups:")
         Console.WriteLine("- Stern (*) : Unverwundbarkeit für 10 Sekunden.")
@@ -1096,26 +1097,43 @@ Module Module1
     End Function
 
     '=========================================================================================================================
-    ' NFI Intro-Animation
+    ' NFI Intro-Animation (Komplett bereinigt und kopierbar)
     '=========================================================================================================================
     Sub IntroAnimation()
         Console.Clear()
         Console.CursorVisible = False
 
         Dim auto() As String = {
-        "   _____  ",
-        "  /_..._\ ",
-        " (0[###]0)",
-        "  `'   `' "
-    }
+            "   _____  ",
+            "  /_..._\ ",
+            " (0[###]0)",
+            "  `'   `' "
+        }
 
         Dim breite As Integer = Console.WindowWidth
         Dim startZeile As Integer = Console.WindowHeight / 2 - 2
         Dim aktuelleWartezeit As Integer = 100
 
-        'Das Auto fährt von links nach rechts durch den Bildschirm
+        'Hinweis auf Möglichkeit zu überspringen
+        Console.ForegroundColor = ConsoleColor.Red
+        Console.SetCursorPosition((breite - 34) / 2, startZeile - 2)
+        Console.WriteLine("[ Drücke eine beliebige Taste zum Überspringen ]")
+        Console.ForegroundColor = ConsoleColor.White
+
+
+        Threading.Thread.Sleep(1000) ' Kurze Pause, damit der Hinweis gelesen werden kann
+
+        ' Das Auto fährt von links nach rechts
         For x As Integer = 0 To breite + 10
-            'Alte Position überschreiben/löschen
+
+            ' Wenn IRGENDEINE Taste gedrückt wird, bricht das Intro SOFORT ab
+            If Console.KeyAvailable Then
+                Console.ReadKey(True) ' Tastendruck abfangen/löschen
+                Console.Clear()
+                Exit Sub              ' Springt direkt ins Hauptmenü
+            End If
+
+            ' Alte Position löschen
             For i As Integer = 0 To auto.Length - 1
                 If x > 0 AndAlso (x - 1) < breite Then
                     Console.SetCursorPosition(x - 1, startZeile + i)
@@ -1123,8 +1141,8 @@ Module Module1
                 End If
             Next
 
-            'Neue Position zeichnen (solange sie im Konsolenfenster liegt)
-            Console.ForegroundColor = ConsoleColor.DarkYellow ' Cooler Sportwagen-Look
+            ' Neue Position zeichnen
+            Console.ForegroundColor = ConsoleColor.DarkYellow
             For i As Integer = 0 To auto.Length - 1
                 If x < breite - auto(i).Length Then
                     Console.SetCursorPosition(x, startZeile + i)
@@ -1132,7 +1150,6 @@ Module Module1
                 End If
             Next
 
-            '"Beschleunigungseffekt": Je weiter das Auto fährt, desto schneller wird es
             If x > breite * 0.3 AndAlso aktuelleWartezeit > 10 Then
                 aktuelleWartezeit = CInt(aktuelleWartezeit * 0.85)
             End If
@@ -1140,19 +1157,13 @@ Module Module1
             Threading.Thread.Sleep(aktuelleWartezeit)
         Next
 
-        'Einblenden des Titelschriftzugs
+        ' Titel-Bildschirm (wird übersprungen, wenn man eine Taste drückt)
         Console.Clear()
         Console.ForegroundColor = ConsoleColor.White
-
-        Dim introTitel As String = "N E E D   F O R   I N F O P R O J E K T"
-        Dim unterTitel As String = "[ Drücke eine beliebige Taste zum Starten ]"
-
-        Console.SetCursorPosition((breite - introTitel.Length) / 2, startZeile)
-        Console.WriteLine(introTitel)
-
-        Console.ForegroundColor = ConsoleColor.Gray
-        Console.SetCursorPosition((breite - unterTitel.Length) / 2, startZeile + 3)
-        Console.WriteLine(unterTitel)
+        Console.SetCursorPosition((breite - 39) / 2, startZeile)
+        Console.WriteLine("N E E D   F O R   I N F O P R O J E K T")
+        Console.SetCursorPosition((breite - 43) / 2, startZeile + 3)
+        Console.WriteLine("[ Drücke eine beliebige Taste zum Starten ]")
 
         Console.ReadKey(True)
         Console.Clear()
