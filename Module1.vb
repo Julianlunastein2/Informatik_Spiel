@@ -1099,7 +1099,68 @@ Module Module1
         Loop
     End Function
 
+    '=========================================================================================================================
+    ' NFI Intro-Animation
+    '=========================================================================================================================
+    Sub IntroAnimation()
+        Console.Clear()
+        Console.CursorVisible = False
 
+        Dim auto() As String = {
+        "   _____  ",
+        "  /_..._\ ",
+        " (0[###]0)",
+        "  `'   `' "
+    }
+
+        Dim breite As Integer = Console.WindowWidth
+        Dim startZeile As Integer = Console.WindowHeight / 2 - 2
+        Dim aktuelleWartezeit As Integer = 100
+
+        ' Das Auto fährt von links nach rechts durch den Bildschirm
+        For x As Integer = 0 To breite + 10
+            ' Alte Position überschreiben/löschen
+            For i As Integer = 0 To auto.Length - 1
+                If x > 0 AndAlso (x - 1) < breite Then
+                    Console.SetCursorPosition(x - 1, startZeile + i)
+                    Console.Write(" ")
+                End If
+            Next
+
+            ' Neue Position zeichnen (solange sie im Konsolenfenster liegt)
+            Console.ForegroundColor = ConsoleColor.DarkYellow ' Cooler Sportwagen-Look
+            For i As Integer = 0 To auto.Length - 1
+                If x < breite - auto(i).Length Then
+                    Console.SetCursorPosition(x, startZeile + i)
+                    Console.Write(auto(i))
+                End If
+            Next
+
+            ' "Beschleunigungseffekt": Je weiter das Auto fährt, desto schneller wird es
+            If x > breite * 0.3 AndAlso aktuelleWartezeit > 10 Then
+                aktuelleWartezeit = CInt(aktuelleWartezeit * 0.85)
+            End If
+
+            Threading.Thread.Sleep(aktuelleWartezeit)
+        Next
+
+        ' Abrupter cooler Break / Einblenden des Titelschriftzugs
+        Console.Clear()
+        Console.ForegroundColor = ConsoleColor.White
+
+        Dim introTitel As String = "N E E D   F O R   I N F O P R O J E K T"
+        Dim unterTitel As String = "[ Drücke eine beliebige Taste zum Starten ]"
+
+        Console.SetCursorPosition((breite - introTitel.Length) / 2, startZeile)
+        Console.WriteLine(introTitel)
+
+        Console.ForegroundColor = ConsoleColor.Gray
+        Console.SetCursorPosition((breite - unterTitel.Length) / 2, startZeile + 3)
+        Console.WriteLine(unterTitel)
+
+        Console.ReadKey(True)
+        Console.Clear()
+    End Sub
 
     '=========================================================================================================================
     'Sub der den Hauptablauf des Spiels steuert, von der Zeilenerzeugung über die Kollisionserkennung bis hin zum Gameover Screen
@@ -1109,6 +1170,7 @@ Module Module1
 
         Console.CursorVisible = False
 
+        IntroAnimation()
 
         'Hauptmenü anzeigen
 
