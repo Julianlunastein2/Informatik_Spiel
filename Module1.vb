@@ -149,7 +149,8 @@ Module Module1
                     Randomize()
                     r = VBMath.Rnd
                     If r < 0.25 Then
-                        Zeile(P) = "+"
+
+                        Zeile(P) = "+" 'Extra Leben
                     ElseIf r < 0.5 Then
                         Zeile(P) = "B" 'Bier
                     ElseIf r < 0.75 Then
@@ -201,37 +202,91 @@ Module Module1
     'Gameover Screen
     '=========================================================================================================================
 
+    '=========================================================================================================================
+    ' Verbesserter Gameover Screen
+    '=========================================================================================================================
     Sub Gameover(ByVal finalScore As Integer)
-        Console.BackgroundColor = ConsoleColor.Red
-        Console.ForegroundColor = ConsoleColor.White
+
+        Console.BackgroundColor = ConsoleColor.Black
         Console.Clear()
-        'Game over Screen
-        Console.WriteLine("
 
+        ' ASCII-Logo in ein Array packen für saubere Zentrierung
+        Dim goLogo() As String = {
+            " ▄████  ▄▄▄       ███▄ ▄███▓▓█████      ▒█████   ██▒   █▓▓█████  ██▀███  ",
+            "██▒ ▀█▒▒████▄    ▓██▒▀█▀ ██▒▓█   ▀     ▒██▒  ██▒▓██░   █▒▓█   ▀ ▓██ ▒ ██▒",
+            "▒██░▄▄▄░▒██  ▀█▄  ▓██    ▓██░▒███       ▒██░  ██▒ ▓██  █▒░▒███   ▓██ ░▄█ ▒",
+            "░▓█  ██▓░██▄▄▄▄██ ▒██    ▒██ ▒▓█  ▄     ▒██   ██░  ▒██ █░░▒▓█  ▄ ▒██▀▀█▄  ",
+            "░▒▓███▀▒ ▓█   ▓██▒▒██▒   ░██▒░▒████▒    ░ ████▓▒░   ▒▀█░  ░▒████▒░██▓ ▒██▒",
+            " ░▒   ▒  ▒▒   ▓▒█░░ ▒░   ░  ░░░ ▒░ ░    ░ ▒░▒░▒░    ░ ▐░  ░░ ▒░ ░░ ░▓ ░▒▓░",
+            "  ░   ░   ▒   ▒▒ ░░  ░      ░ ░ ░  ░      ░ ▒ ▒░    ░ ░░   ░ ░  ░  ░▒ ░ ▒░",
+            "░ ░   ░   ░   ▒   ░      ░      ░       ░ ░ ░ ▒       ░░     ░     ░░   ░ ",
+            "      ░       ░  ░       ░      ░  ░        ░ ░        ░     ░  ░   ░     ",
+            "                                                      ░                   "
+        }
 
+        ' 2. LOGO ROT/WEISS UTZENTRIERT AUSGEBEN
+        Dim breite As Integer = Console.WindowWidth
+        Dim startZeile As Integer = 3
 
-              ▄████  ▄▄▄       ███▄ ▄███▓▓█████     ▒█████   ██▒   █▓▓█████  ██▀███  
-             ██▒ ▀█▒▒████▄    ▓██▒▀█▀ ██▒▓█   ▀    ▒██▒  ██▒▓██░   █▒▓█   ▀ ▓██ ▒ ██▒
-            ▒██░▄▄▄░▒██  ▀█▄  ▓██    ▓██░▒███      ▒██░  ██▒ ▓██  █▒░▒███   ▓██ ░▄█ ▒
-            ░▓█  ██▓░██▄▄▄▄██ ▒██    ▒██ ▒▓█  ▄    ▒██   ██░  ▒██ █░░▒▓█  ▄ ▒██▀▀█▄  
-            ░▒▓███▀▒ ▓█   ▓██▒▒██▒   ░██▒░▒████▒   ░ ████▓▒░   ▒▀█░  ░▒████▒░██▓ ▒██▒
-             ░▒   ▒  ▒▒   ▓▒█░░ ▒░   ░  ░░░ ▒░ ░   ░ ▒░▒░▒░    ░ ▐░  ░░ ▒░ ░░ ▒▓ ░▒▓░
-              ░   ░   ▒   ▒▒ ░░  ░      ░ ░ ░  ░     ░ ▒ ▒░    ░ ░░   ░ ░  ░  ░▒ ░ ▒░
-            ░ ░   ░   ░   ▒   ░      ░      ░      ░ ░ ░ ▒       ░░     ░     ░░   ░ 
-                  ░       ░  ░       ░      ░  ░       ░ ░        ░     ░  ░   ░     
-                                                                 ░                   
-")
-        Console.ReadLine()
+        For i As Integer = 0 To goLogo.Length - 1
+            Dim xPos As Integer = (breite - goLogo(i).Length) / 2
+            If xPos < 0 Then xPos = 0
+            Console.SetCursorPosition(xPos, startZeile + i)
 
-        'Nach Game Over wieder normale Farben 
+            ' Wechselnde Farben für den "Blut/Glut"-Effekt im Text
+            If i < 5 Then
+                Console.ForegroundColor = ConsoleColor.DarkRed
+            Else
+                Console.ForegroundColor = ConsoleColor.Red
+            End If
+            Console.Write(goLogo(i))
+        Next
 
-        Console.WriteLine("=========================================")
-        Console.WriteLine("GAME OVER! Dein finaler Punktestand: " & finalScore)
-        Console.WriteLine("=========================================")
+        ' 3. STATISTIK-BOX ENTWERFEN
+        Console.ForegroundColor = ConsoleColor.White
+        Dim boxZeile As Integer = startZeile + goLogo.Length + 2
+
+        Dim diffText As String = ""
+        Select Case aktuelleSchwierigkeit
+            Case Schwierigkeit.Leicht : diffText = "LEICHT"
+            Case Schwierigkeit.Mittel : diffText = "MITTEL"
+            Case Schwierigkeit.Schwer : diffText = "SCHWER"
+        End Select
+
+        ' Box zentrieren
+        Dim boxBreite As Integer = 42
+        Dim xBox As Integer = (breite - boxBreite) / 2
+        If xBox < 0 Then xBox = 0
+
+        Console.SetCursorPosition(xBox, boxZeile)
+        Console.WriteLine("╔════════════════════════════════════════╗")
+        Console.SetCursorPosition(xBox, boxZeile + 1)
+        Console.Write("║ ")
+        Console.ForegroundColor = ConsoleColor.Gray
+        Console.Write("Modus: ")
+        Console.ForegroundColor = ConsoleColor.Yellow
+        Console.Write(diffText.PadRight(10))
+        Console.ForegroundColor = ConsoleColor.Gray
+        Console.Write(" | Score: ")
+        Console.ForegroundColor = ConsoleColor.Green
+        Console.Write(finalScore.ToString().PadRight(12))
+        Console.ForegroundColor = ConsoleColor.White
+        Console.WriteLine("║")
+        Console.SetCursorPosition(xBox, boxZeile + 2)
+        Console.WriteLine("╚════════════════════════════════════════╝")
+
         Console.WriteLine()
 
-        ' Namensabfrage für das Scoreboard
-        Console.Write("Bitte gib deinen Namen ein: ")
+        ' 4. NAMENSABFRAGE
+        Console.ForegroundColor = ConsoleColor.Cyan
+        Dim frageText As String = "            Gib deinen Namen für die Highscore-Tabelle ein: "
+        Dim xFrage As Integer = (breite - frageText.Length - 15) / 2
+        If xFrage < 0 Then xFrage = 0
+
+        Console.SetCursorPosition(xFrage, boxZeile + 4)
+        Console.Write(frageText)
+
+        Console.ForegroundColor = ConsoleColor.White
         Dim name As String = Console.ReadLine()
         If String.IsNullOrWhiteSpace(name) Then name = "Unbekannt"
 
@@ -243,17 +298,24 @@ Module Module1
             Case Schwierigkeit.Schwer : dateiName = "highscores_schwer.txt"
         End Select
 
-        ' Scoreboard füttern
+        'Scoreboard füttern
         ScoreboardSpeichern(dateiName, name, finalScore)
 
+        '5. ERFOLGSMELDUNG
         Console.WriteLine()
-        Console.WriteLine("Score erfolgreich gespeichert! Drücke Enter...")
+        Console.ForegroundColor = ConsoleColor.Green
+        Dim erfolgText As String = "Score erfolgreich gespeichert! [Drücke Enter]"
+        Dim xErfolg As Integer = (breite - erfolgText.Length) / 2
+        If xErfolg < 0 Then xErfolg = 0
+
+        Console.SetCursorPosition(xErfolg, boxZeile + 6)
+        Console.WriteLine(erfolgText)
         Console.ReadLine()
-        Console.Clear()
 
+        'Aufräumen für das Hauptmenü
         Console.BackgroundColor = ConsoleColor.Black
+        Console.ForegroundColor = ConsoleColor.White
         Console.Clear()
-
     End Sub
 
 
@@ -437,6 +499,14 @@ Module Module1
 
         SpielfigurPos = SPALTE_MAX / 2
 
+        For z = 0 To ZEILE_MAX
+            For s = 0 To SPALTE_MAX
+                ' Standardmäßig überall Leerzeichen setzen um Generierung des Randes nicht zu unterbrechen
+                spielfeld(z, s) = " "
+            Next
+        Next
+
+
         'Hauptschleife des Spiels
         Do
             'neue Zeile erzeugen
@@ -469,7 +539,7 @@ Module Module1
             Console.SetCursorPosition(0, 0)
             Console.BackgroundColor = ConsoleColor.Black ' Hintergrund bleibt immer sauber schwarz
 
-            ' Globale Textfarbe basierend auf aktiven Effekten bestimmen
+            ' Globale Textfarbe basierend auf aktiven Effekten/Items bestimmen
             Dim effektFarbe As ConsoleColor = ConsoleColor.White
 
             If DateTime.Now < unverwundbar Then
@@ -499,21 +569,30 @@ Module Module1
                 End If
                 Console.Write("║")
 
-                ' Inhalt zeichnen
+                'Inhalt zeichnen
                 For s = 0 To SPALTE_MAX
-                    If spielfeld(z, s) = "|" Then
-                        ' Spurmarkierungen leicht abdunkeln, außer ein Effekt ist aktiv
-                        If effektFarbe <> ConsoleColor.White Then
-                            Console.ForegroundColor = effektFarbe
-                        Else
-                            Console.ForegroundColor = ConsoleColor.DarkGray
-                        End If
-                        Console.Write(spielfeld(z, s))
+                    ' Wenn kein globaler Statuseffekt aktiv ist, bekommen Symbole ihre eigene Farbe
+                    If effektFarbe = ConsoleColor.White Then
+                        Select Case spielfeld(z, s)
+                            Case "|" : Console.ForegroundColor = ConsoleColor.DarkGray
+                            Case "+" : Console.ForegroundColor = ConsoleColor.Red         ' Herz = Rot
+                            Case "B" : Console.ForegroundColor = ConsoleColor.DarkGreen   ' Bier = Grün
+                            Case "*" : Console.ForegroundColor = ConsoleColor.Yellow      ' Stern = Gelb
+                            Case "S" : Console.ForegroundColor = ConsoleColor.Cyan        ' Speed = Blau
+                            Case " " : Console.ForegroundColor = ConsoleColor.White
+                            Case Else : Console.ForegroundColor = ConsoleColor.Gray
+                                ' Gegner-Autos
+                        End Select
                     Else
-                        ' Normaler Spielinhalt (Gegner, Straße) nimmt die Effektfarbe an
-                        Console.ForegroundColor = effektFarbe
-                        Console.Write(spielfeld(z, s))
+                        ' Wenn ein Statuseffekt aktiv ist, blinkt/leuchtet alles in dieser Farbe
+                        If spielfeld(z, s) = "|" Then
+                            Console.ForegroundColor = ConsoleColor.DarkGray
+                        Else
+                            Console.ForegroundColor = effektFarbe
+                        End If
                     End If
+
+                    Console.Write(spielfeld(z, s))
                 Next
 
                 ' Rechter Rahmen
@@ -608,11 +687,12 @@ Module Module1
                 'Kollisionserkennung
                 Dim kollisionErkannt As Boolean = False
 
-                ' Prüfen, ob aktuell IRGENDEIN Statuseffekt aktiv ist
+                'Prüfen, ob aktuell IRGENDEIN Statuseffekt aktiv ist
                 Dim effektAktiv As Boolean = (DateTime.Now < unverwundbar) OrElse
                                              (DateTime.Now < bierEffektBis) OrElse
                                              (DateTime.Now < speedBoostBis)
 
+                'Items und Effekte
                 For f As Integer = 1 To 4
                     For h As Integer = 1 To 8
                         Dim symbol As Char = spielfeld(ZEILE_MAX - f, SpielfigurPos + h)
@@ -1229,6 +1309,7 @@ Module Module1
         Console.ForegroundColor = ConsoleColor.White
         Console.SetCursorPosition((breite - 39) / 2, startZeile)
         Console.WriteLine("N E E D   F O R   I N F O P R O J E K T")
+        Console.WriteLine("EPISCHES INTRO")
         Console.SetCursorPosition((breite - 43) / 2, startZeile + 3)
         Console.WriteLine("[ Drücke eine beliebige Taste zum Starten ]")
 
