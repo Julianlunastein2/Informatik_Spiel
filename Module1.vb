@@ -11,9 +11,9 @@ Module Module1
     Const UNKNOWN_KEY = 99
     '============================================================================================
     'Spuren Einstellungen: Hier kann die Anzahl der Spuren angepasst werden, sowie die Breite der Spuren, damit das Spiel variabler wird. 
-    Const SPUREN_ANZAHL = 10     'Variabel um die Anzahl der Spuren einzustellen !!!
+    Dim SPUREN_ANZAHL = 10     'Variabel um die Anzahl der Spuren einzustellen !!!
     Const SPUR_BREITE = 12
-    Const SPALTE_MAX = SPUREN_ANZAHL * SPUR_BREITE
+    Dim SPALTE_MAX = SPUREN_ANZAHL * SPUR_BREITE
     '===========================================================================================
     Const ZEILE_MAX = 24
     Const A_MIN = 1
@@ -264,6 +264,7 @@ Module Module1
     Enum Hauptmenü
         Spielen
         Schwierigkeit
+        SpurenAnzahl
         Scoreboard
         AutoOptik
         Anleitung
@@ -282,7 +283,7 @@ Module Module1
     Function Startmenü() As Hauptmenü
 
         Dim auswahl As Integer = 0
-        Dim optionen() As String = {"SPIEL STARTEN", "SCHWIERIGKEIT", "SCOREBOARD", "AUTO OPTIK", "ANLEITUNG", "SPIEL BEENDEN"}
+        Dim optionen() As String = {"SPIEL STARTEN", "SCHWIERIGKEIT", "Spurenanzahl", "SCOREBOARD", "AUTO OPTIK", "ANLEITUNG", "SPIEL BEENDEN"}
 
         ' Dein ASCII-Schriftzug zeilenweise im Array hinterlegt
         Dim logo() As String = {
@@ -369,10 +370,11 @@ Module Module1
                     Select Case auswahl
                         Case 0 : Return Hauptmenü.Spielen
                         Case 1 : Return Hauptmenü.Schwierigkeit
-                        Case 2 : Return Hauptmenü.Scoreboard
-                        Case 3 : Return Hauptmenü.AutoOptik
-                        Case 4 : Return Hauptmenü.Anleitung
-                        Case 5 : Return Hauptmenü.Beenden
+                        Case 2 : Return Hauptmenü.SpurenAnzahl
+                        Case 3 : Return Hauptmenü.Scoreboard
+                        Case 4 : Return Hauptmenü.AutoOptik
+                        Case 5 : Return Hauptmenü.Anleitung
+                        Case 6 : Return Hauptmenü.Beenden
                     End Select
             End Select
 
@@ -412,24 +414,24 @@ Module Module1
 
             Case Schwierigkeit.Leicht
                 leben = 7          ' Mehr Leben
-                a_max = 1.5        ' Weniger Gegner am Anfang
+                a_max = A_MAX_START - 1  ' Weniger Gegner am Anfang
                 itemWarscheinlichkeit = 0.1 ' Chance auf Items
                 Wartezeit = 250    ' Auto fährt langsamer am Anfang
-                minWartezeit = 50  ' Maximaler Speed
+                minWartezeit = 30  ' Maximaler Speed
 
             Case Schwierigkeit.Mittel
                 leben = 5
                 a_max = A_MAX_START
                 itemWarscheinlichkeit = 0.08 ' Chance auf Items
                 Wartezeit = 200
-                minWartezeit = 40
+                minWartezeit = 20
 
             Case Schwierigkeit.Schwer
                 leben = 3          ' Weniger Leben
-                a_max = 3.0
+                a_max = A_MAX_START + 2
                 itemWarscheinlichkeit = 0.02 ' Geringere Chance auf Items
                 Wartezeit = 130
-                minWartezeit = 20
+                minWartezeit = 1
 
         End Select
 
@@ -851,6 +853,52 @@ Module Module1
     End Sub
 
     '=========================================================================================================================
+    ' Sub um die Anzahl der Spuren im Spiel anzupassen
+    '=========================================================================================================================
+    Sub SpurenAnpassen()
+        Dim taste As ConsoleKey
+        Do
+            Console.Clear()
+            Console.ForegroundColor = ConsoleColor.White
+            Console.WriteLine("=====================================")
+            Console.WriteLine("          SPURENANZAHL WÄHLEN        ")
+            Console.WriteLine("=====================================")
+            Console.WriteLine()
+            Console.WriteLine(" Erhöht oder verringert die Breite des Spielfelds.")
+            Console.WriteLine()
+
+            ' Anzeige der aktuellen Auswahl
+            Console.Write(" Aktuelle Spurenanzahl: ")
+            Console.ForegroundColor = ConsoleColor.DarkYellow
+            Console.WriteLine($"[ {SPUREN_ANZAHL} Spuren ]")
+            Console.ForegroundColor = ConsoleColor.White
+
+            Console.WriteLine()
+            Console.WriteLine("=====================================")
+            Console.WriteLine("[ Pfeiltaste Links  (-) / Rechts (+) ]")
+            Console.WriteLine("[ Enter zum Bestätigen               ]")
+
+            taste = Console.ReadKey(True).Key
+
+            ' Spurenanzahl begrenzen (z.B. min. 3 Spuren, max. 12 Spuren wegen Konsolenbreite)
+            If taste = ConsoleKey.LeftArrow Then
+                If SPUREN_ANZAHL > 3 Then
+                    SPUREN_ANZAHL -= 1
+                End If
+            ElseIf taste = ConsoleKey.RightArrow Then
+                If SPUREN_ANZAHL < 12 Then
+                    SPUREN_ANZAHL += 1
+                End If
+            End If
+
+        Loop Until taste = ConsoleKey.Enter
+
+        ' Nach der Auswahl den Maximalwert direkt neu berechnen
+        SPALTE_MAX = SPUREN_ANZAHL * SPUR_BREITE
+        Console.Clear()
+    End Sub
+
+    '=========================================================================================================================
     ' Scoreboard-Logik: Laden, Speichern (nach Punkten sortiert) und Anzeigen (3 Spalten nebeneinander)
     '=========================================================================================================================
 
@@ -1024,9 +1072,9 @@ Module Module1
         Console.WriteLine("- Drücke -LEER- um das Spiel zu pausieren und zum Hauptmenü zurückzukehren!")
         Console.WriteLine()
         Console.WriteLine("Power-Ups:")
-        Console.WriteLine("- Stern (*) : Unverwundbarkeit für 10 Sekunden.")
+        Console.WriteLine("- Stern (*) : Unverwundbarkeit für 10 Sekunden + Nimm so viele Autos mit wie möglich, es gibt extra Punkte ;9.")
         Console.WriteLine("- Bier (B) : Vertauscht die Steuerung für 15 Sekunden (Vorsicht!).")
-        Console.WriteLine("- Speed Boost (S) : Verdoppelt deine Punktzahl für 10 Sekunden!")
+        Console.WriteLine("- Speed Boost (S) : Verdoppelt deine Punktzahl für 10 Sekunden, während das Gaspedal am Boden klebt.")
         Console.WriteLine("- Herz (+) : Gibt dir ein zusätzliches Leben.")
         Console.WriteLine()
         Console.WriteLine("Punktevergabe:")
@@ -1213,6 +1261,9 @@ Module Module1
 
             ElseIf aktion = Hauptmenü.Schwierigkeit Then
                 SchwierigkeitAnpassen()
+
+            ElseIf aktion = Hauptmenü.SpurenAnzahl Then
+                SpurenAnpassen()
 
             ElseIf aktion = Hauptmenü.Scoreboard Then
                 ScoreboardAnzeigen()
