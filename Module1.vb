@@ -1,6 +1,7 @@
 ﻿Imports System.IO
 Imports System.Threading
-Imports System.Runtime.InteropServices
+Imports System.Media
+
 
 Module Module1
 
@@ -200,10 +201,6 @@ Module Module1
 
     '=========================================================================================================================
     'Gameover Screen
-    '=========================================================================================================================
-
-    '=========================================================================================================================
-    ' Verbesserter Gameover Screen
     '=========================================================================================================================
     Sub Gameover(ByVal finalScore As Integer)
 
@@ -470,7 +467,11 @@ Module Module1
         Dim score As Integer = 0 'Unser Punktezähler
         Dim itemWarscheinlichkeit As Single 'Variable um die Warscheinlichkeit zu speichern, mit der Items spawnen, wird in Schwierigkeit angepasst
         Dim minWartezeit As Integer 'Definiert die schnellste Geschwindigkeit des Games
+        '============================================================================================================================
+        'Musikdateien
+        Dim hintergrunMusik As New SoundPlayer("Highway_to_hell.wav")
 
+        '============================================================================================================================
         'Startwerte basierend auf der Schwierigkeit setzen
         Select Case aktuelleSchwierigkeit
 
@@ -506,6 +507,8 @@ Module Module1
             Next
         Next
 
+        'Starke Musik im Hintergrund
+        hintergrunMusik.PlayLooping()
 
         'Hauptschleife des Spiels
         Do
@@ -633,6 +636,7 @@ Module Module1
                     Dim zumHauptmenüAbbrechen As Boolean = PausenMenüAnzeigen(score, leben, istBetrunken, istImBoost)
 
                     If zumHauptmenüAbbrechen Then
+                        hintergrunMusik.Stop()
                         Exit Sub
                     End If
 
@@ -856,6 +860,16 @@ Module Module1
             End If
 
         Loop Until leben <= 0
+
+        'Hintergrundmusik bei "Tod" stoppen
+        hintergrunMusik.Stop()
+
+        'Krankenhaus Sound
+        For g As Integer = 1 To 3
+            Console.Beep(800, 250) ' Kurzer Piep
+            Thread.Sleep(500)      ' Halbe Sekunde Pause
+        Next
+        Console.Beep(800, 2000)    ' Langer flacher Piep (Flatline)
 
         Gameover(score)
 
@@ -1233,6 +1247,7 @@ Module Module1
                 Else
                     ' Zurück zum Hauptmenü
                     Return True
+
                 End If
             End If
         Loop
@@ -1255,11 +1270,13 @@ Module Module1
         Dim breite As Integer = Console.WindowWidth
         Dim startZeile As Integer = Console.WindowHeight / 2 - 2
         Dim aktuelleWartezeit As Integer = 100
+        Dim introSound As New SoundPlayer("Geisterfahrer.wav")
 
         'Hinweis auf Möglichkeit zu überspringen
         Console.ForegroundColor = ConsoleColor.Red
         Console.SetCursorPosition((breite - 34) / 2, startZeile - 2)
         Console.WriteLine("BITTE VOR START BILDSCHIRM AUF MAXIMIEREN!")
+        introSound.Play()
         Thread.Sleep(5000) ' Kurze Pause, damit der Hinweis gelesen werden kann
         Console.SetCursorPosition((breite - 34) / 2, startZeile - 2)
         Console.WriteLine("                                      ") ' Hinweis löschen
@@ -1276,6 +1293,7 @@ Module Module1
             ' Wenn IRGENDEINE Taste gedrückt wird, bricht das Intro SOFORT ab
             If Console.KeyAvailable Then
                 Console.ReadKey(True) ' Tastendruck abfangen/löschen
+                introSound.Stop()
                 Console.Clear()
                 Exit Sub              ' Springt direkt ins Hauptmenü
             End If
@@ -1309,11 +1327,10 @@ Module Module1
         Console.ForegroundColor = ConsoleColor.White
         Console.SetCursorPosition((breite - 39) / 2, startZeile)
         Console.WriteLine("N E E D   F O R   I N F O P R O J E K T")
-        Console.WriteLine("EPISCHES INTRO")
         Console.SetCursorPosition((breite - 43) / 2, startZeile + 3)
         Console.WriteLine("[ Drücke eine beliebige Taste zum Starten ]")
-
         Console.ReadKey(True)
+        introSound.Stop()
         Console.Clear()
     End Sub
 
