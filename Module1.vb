@@ -427,10 +427,13 @@ Module Module1
                 Case ConsoleKey.UpArrow
                     auswahl -= 1
                     If auswahl < 0 Then auswahl = optionen.Length - 1
+                    Console.Beep(700, 30) 'Kurzer Piepton bei Navigation
                 Case ConsoleKey.DownArrow
                     auswahl += 1
                     If auswahl >= optionen.Length Then auswahl = 0
+                    Console.Beep(700, 30) 'Kurzer Piepton bei Navigation
                 Case ConsoleKey.Enter
+                    Console.Beep(500, 80) 'Längerer Piepton bei Auswahl
                     Select Case auswahl
                         Case 0 : Return Hauptmenü.Spielen
                         Case 1 : Return Hauptmenü.Schwierigkeit
@@ -924,33 +927,34 @@ Module Module1
     'Sub der die Schwierigkeit des Spiels anpasst
     '=========================================================================================================================
 
+    '=========================================================================================================================
+    'Sub der die Schwierigkeit des Spiels anpasst (inklusive Anzeige der jeweiligen Einstellungen)
+    '=========================================================================================================================
     Sub SchwierigkeitAnpassen()
-
         Dim taste As ConsoleKey
+
         Do
             Console.Clear()
             Console.ForegroundColor = ConsoleColor.White
             Console.WriteLine("=====================================")
-            Console.WriteLine("        SCHWIERIGKEIT EINSTELLEN     ")
+            Console.WriteLine("       SCHWIERIGKEIT EINSTELLEN      ")
             Console.WriteLine("=====================================")
             Console.WriteLine()
 
             ' Textfarbe auf Orange für die aktive Auswahl setzen, danach wieder auf Weiß
             If aktuelleSchwierigkeit = Schwierigkeit.Leicht Then
                 Console.ForegroundColor = ConsoleColor.DarkYellow
-                Console.Write("  > [ LEICHT ] <")
+                Console.Write(" > [ LEICHT ] <")
                 Console.ForegroundColor = ConsoleColor.White
-                Console.WriteLine("    Mittel      Schwer")
-
+                Console.WriteLine("   Mittel      Schwer")
             ElseIf aktuelleSchwierigkeit = Schwierigkeit.Mittel Then
-                Console.Write("    Leicht    ")
+                Console.Write("   Leicht    ")
                 Console.ForegroundColor = ConsoleColor.DarkYellow
                 Console.Write("> [ MITTEL ] <")
                 Console.ForegroundColor = ConsoleColor.White
-                Console.WriteLine("    Schwer")
-
+                Console.WriteLine("   Schwer")
             ElseIf aktuelleSchwierigkeit = Schwierigkeit.Schwer Then
-                Console.Write("    Leicht      Mittel    ")
+                Console.Write("   Leicht      Mittel    ")
                 Console.ForegroundColor = ConsoleColor.DarkYellow
                 Console.WriteLine("> [ SCHWER ] <")
                 Console.ForegroundColor = ConsoleColor.White
@@ -958,12 +962,39 @@ Module Module1
 
             Console.WriteLine()
             Console.WriteLine("=====================================")
+            Console.ForegroundColor = ConsoleColor.Cyan
+            Console.WriteLine(" Aktuelle Einstellungen dieses Modus:")
+            Console.ForegroundColor = ConsoleColor.White
+
+            ' Dynamische Anzeige der Parameter passend zur ausgewählten Schwierigkeit
+            Select Case aktuelleSchwierigkeit
+                Case Schwierigkeit.Leicht
+                    Console.WriteLine("  • Start-Leben:           7")
+                    Console.WriteLine("  • Gegneraufkommen:       Sehr gering")
+                    Console.WriteLine("  • Start-Geschwindigkeit: Gemütlich (250ms)")
+                    Console.WriteLine("  • Item-Chance:           Hoch (10%)")
+
+                Case Schwierigkeit.Mittel
+                    Console.WriteLine("  • Start-Leben:           5")
+                    Console.WriteLine("  • Gegneraufkommen:       Normal")
+                    Console.WriteLine("  • Start-Geschwindigkeit: Standard (200ms)")
+                    Console.WriteLine("  • Item-Chance:           Normal (8%)")
+
+                Case Schwierigkeit.Schwer
+                    Console.WriteLine("  • Start-Leben:           3")
+                    Console.WriteLine("  • Gegneraufkommen:       Sehr hoch")
+                    Console.WriteLine("  • Start-Geschwindigkeit: Rasant (130ms)")
+                    Console.WriteLine("  • Item-Chance:           Gering (2%)")
+            End Select
+
+            Console.WriteLine("=====================================")
+            Console.ForegroundColor = ConsoleColor.Gray
             Console.WriteLine("[ Pfeiltasten Links/Rechts zum Ändern")
             Console.WriteLine("  Enter zum Bestätigen ]")
 
             taste = Console.ReadKey(True).Key
 
-            ' KORREKTUR: Auswahl per Pfeiltasten mit ElseIf, um den Domino-Effekt zu verhindern
+            ' Auswahl per Pfeiltasten
             If taste = ConsoleKey.LeftArrow Then
                 If aktuelleSchwierigkeit = Schwierigkeit.Schwer Then
                     aktuelleSchwierigkeit = Schwierigkeit.Mittel
@@ -972,7 +1003,6 @@ Module Module1
                 ElseIf aktuelleSchwierigkeit = Schwierigkeit.Leicht Then
                     aktuelleSchwierigkeit = Schwierigkeit.Schwer
                 End If
-
             ElseIf taste = ConsoleKey.RightArrow Then
                 If aktuelleSchwierigkeit = Schwierigkeit.Leicht Then
                     aktuelleSchwierigkeit = Schwierigkeit.Mittel
