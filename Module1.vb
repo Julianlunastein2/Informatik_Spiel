@@ -224,6 +224,9 @@ Module Module1
         ' 2. LOGO ROT/WEISS UTZENTRIERT AUSGEBEN
         Dim breite As Integer = Console.WindowWidth
         Dim startZeile As Integer = 3
+        Dim GlockenMusik As New SoundPlayer("Glocke.wav")
+
+        GlockenMusik.PlayLooping()
 
         For i As Integer = 0 To goLogo.Length - 1
             Dim xPos As Integer = (breite - goLogo(i).Length) / 2
@@ -312,7 +315,9 @@ Module Module1
         'Aufräumen für das Hauptmenü
         Console.BackgroundColor = ConsoleColor.Black
         Console.ForegroundColor = ConsoleColor.White
+        GlockenMusik.Stop()
         Console.Clear()
+
     End Sub
 
 
@@ -470,6 +475,9 @@ Module Module1
         '============================================================================================================================
         'Musikdateien
         Dim hintergrunMusik As New SoundPlayer("Highway_to_hell.wav")
+        Dim bierMusik As New SoundPlayer("Gluck_gluck_vodka.wav")
+        Dim sternMusik As New SoundPlayer("Yippie_Stern.wav")
+        Dim extraLebenMusik As New SoundPlayer("Geil.wav")
 
         '============================================================================================================================
         'Startwerte basierend auf der Schwierigkeit setzen
@@ -705,6 +713,7 @@ Module Module1
                             'Keine Kollision, weitergehen
 
                         ElseIf symbol = "+" Then
+                            extraLebenMusik.Play() 'Soundeffekt für Extra Leben
                             leben = leben + 1
                             spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
 
@@ -712,6 +721,7 @@ Module Module1
                             ' Nur einsammeln, wenn kein anderer Effekt aktiv ist
                             If Not effektAktiv Then
                                 'Bier -> Item 3 (Kontrollen vertauscht)
+                                bierMusik.Play() 'Soundeffekt für Bier
                                 bierEffektBis = DateTime.Now.AddSeconds(15) ' Effekt für 15 Sekunden aktivieren
                                 spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
                             End If
@@ -720,6 +730,7 @@ Module Module1
                             ' Nur einsammeln, wenn kein anderer Effekt aktiv ist
                             If Not effektAktiv Then
                                 'Stern -> Unverwundbarkeit (Item 1)
+                                sternMusik.Play() 'Soundeffekt für Stern
                                 unverwundbar = DateTime.Now.AddSeconds(10)
                                 spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
                             End If
@@ -864,6 +875,7 @@ Module Module1
         'Hintergrundmusik bei "Tod" stoppen
         hintergrunMusik.Stop()
 
+        Thread.Sleep(200) ' Kurze Pause vor dem Gameover-Sound
         'Krankenhaus Sound
         For g As Integer = 1 To 3
             Console.Beep(800, 250) ' Kurzer Piep

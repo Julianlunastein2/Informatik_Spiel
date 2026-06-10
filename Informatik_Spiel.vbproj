@@ -110,6 +110,9 @@
     <Content Include="Geisterfahrer.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Glocke.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Gluck_gluck_vodka.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -119,7 +122,7 @@
     <Content Include="I_feel_good_%28vodka alternative%29.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Sounds_Geil gemacht Extra leben.wav">
+    <Content Include="Geil.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Stern.wav">
