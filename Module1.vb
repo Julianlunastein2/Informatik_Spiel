@@ -473,11 +473,15 @@ Module Module1
         Dim itemWarscheinlichkeit As Single 'Variable um die Warscheinlichkeit zu speichern, mit der Items spawnen, wird in Schwierigkeit angepasst
         Dim minWartezeit As Integer 'Definiert die schnellste Geschwindigkeit des Games
         '============================================================================================================================
+        'Musikpause
+        Dim musikpause As Integer = 0 'cooldown nachdem die Hintergrundmusik weiter abspielt
+
         'Musikdateien
         Dim hintergrunMusik As New SoundPlayer("Highway_to_hell.wav")
         Dim bierMusik As New SoundPlayer("Gluck_gluck_vodka.wav")
         Dim sternMusik As New SoundPlayer("Yippie_Stern.wav")
-        Dim extraLebenMusik As New SoundPlayer("Geil.wav")
+        Dim extraLebenMusik As New SoundPlayer("Geil2.wav")
+        Dim speedMusik As New SoundPlayer("Gonzales.wav")
 
         '============================================================================================================================
         'Startwerte basierend auf der Schwierigkeit setzen
@@ -717,6 +721,8 @@ Module Module1
                             leben = leben + 1
                             spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
 
+                            musikpause = 7 'Kurze Musikpause, damit sich die Sounds nicht überlappen
+
                         ElseIf symbol = "B" Then
                             ' Nur einsammeln, wenn kein anderer Effekt aktiv ist
                             If Not effektAktiv Then
@@ -724,6 +730,9 @@ Module Module1
                                 bierMusik.Play() 'Soundeffekt für Bier
                                 bierEffektBis = DateTime.Now.AddSeconds(15) ' Effekt für 15 Sekunden aktivieren
                                 spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
+
+                                musikpause = 4 'Kurze Musikpause, damit sich die Sounds nicht überlappen
+
                             End If
 
                         ElseIf symbol = "*" Then
@@ -733,14 +742,20 @@ Module Module1
                                 sternMusik.Play() 'Soundeffekt für Stern
                                 unverwundbar = DateTime.Now.AddSeconds(10)
                                 spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
+
+                                musikpause = 4 'Kurze Musikpause, damit sich die Sounds nicht überlappen
+
                             End If
 
                         ElseIf symbol = "S" Then
                             ' Nur einsammeln, wenn kein anderer Effekt aktiv ist
                             If Not effektAktiv Then
                                 'Speed Boost -> Item 2
+                                speedMusik.Play() 'Soundeffekt für Speed Boost
                                 speedBoostBis = DateTime.Now.AddSeconds(10)
                                 spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
+
+                                musikpause = 4 'Kurze Musikpause, damit sich die Sounds nicht überlappen
                             End If
 
                             ' Wenn es kein Item, keine Leerstelle und keine Wand ist, ist es ein gegnerisches Auto
@@ -869,6 +884,21 @@ Module Module1
             Else
                 score += 1 ' Normaler Punktgewinn
             End If
+
+            '==========================================
+            'AUTOMATISCHER MUSIK-NEUSTART NACH ITEMS
+            '==========================================
+            If musikpause > 0 Then
+                musikpause -= 1 ' Zähler runterzählen
+
+                ' Wenn die Zeit um ist, die Hintergrundmusik wieder im Loop starten
+                If musikpause = 0 Then
+                    hintergrunMusik.PlayLooping()
+                End If
+            End If
+
+            ' Das bestehende Sleep deines Spiels sorgt für die Verzögerung
+
 
         Loop Until leben <= 0
 
