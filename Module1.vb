@@ -427,13 +427,13 @@ Module Module1
                 Case ConsoleKey.UpArrow
                     auswahl -= 1
                     If auswahl < 0 Then auswahl = optionen.Length - 1
-                    Console.Beep(700, 30) 'Kurzer Piepton bei Navigation
+
                 Case ConsoleKey.DownArrow
                     auswahl += 1
                     If auswahl >= optionen.Length Then auswahl = 0
-                    Console.Beep(700, 30) 'Kurzer Piepton bei Navigation
+
                 Case ConsoleKey.Enter
-                    Console.Beep(500, 80) 'Längerer Piepton bei Auswahl
+
                     Select Case auswahl
                         Case 0 : Return Hauptmenü.Spielen
                         Case 1 : Return Hauptmenü.Schwierigkeit
@@ -1455,5 +1455,7 @@ Module Module1
         Console.WriteLine("Spiel beendet.")
 
     End Sub
+
+
 
 End Module
