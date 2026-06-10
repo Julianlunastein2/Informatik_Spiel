@@ -48,7 +48,7 @@ Module Module1
     '=========================================================================================================================
 
 
-    Sub ZeilenErzeugung(ByRef Zeile() As Char, ByVal a_max As Integer, ByVal idx As Integer, ByVal auto_schicht As Integer, ByRef autoInSpur() As Boolean, ByRef spawnCooldown As Integer)
+    Sub ZeilenErzeugung(ByRef Zeile() As Char, ByVal a_max As Integer, ByVal idx As Integer, ByVal auto_schicht As Integer, ByRef autoInSpur() As Boolean, ByRef spawnCooldown As Integer, ByRef itemWarscheinlichkeit As Single)
 
         'Deklarieren der Variablen
         'Dim A As Integer'    'Anzahl der Hindernisblocks
@@ -56,6 +56,7 @@ Module Module1
         Dim i As Integer
         Dim G As Integer    'Größe des Hindernisblocks
         Dim P As Integer    'Position des Hindernisblocks
+
 
 
         'Auto Abbildung
@@ -138,7 +139,7 @@ Module Module1
             'Item Generierung
             Randomize()
             X = VBMath.Rnd
-            If X < 0.1 Then '10% Chance auf Item
+            If X < itemWarscheinlichkeit Then 'Chance auf Item
 
                 P = (SPUR_BREITE / 2) + (SPUR_BREITE * i)
 
@@ -393,7 +394,7 @@ Module Module1
         Dim Taste As Integer
         Dim SpielfigurPos As Integer
         Dim i As Integer
-        Dim Wartezeit As Integer
+        Dim Wartezeit As Single
         Dim a_max As Single
         Dim idx = 0  'Zähler für die Spurenbegrenzung
         Dim auto_schicht As Integer = 3 'Zähler für die Autoabildung
@@ -403,24 +404,33 @@ Module Module1
         Dim bierEffektBis As DateTime = DateTime.MinValue 'Speichert, bis wann die Steuerung vertauscht ist
         Dim speedBoostBis As DateTime = DateTime.MinValue 'Speichert, bis wann der Speedboost aktiv ist
         Dim score As Integer = 0 'Unser Punktezähler
-
+        Dim itemWarscheinlichkeit As Single 'Variable um die Warscheinlichkeit zu speichern, mit der Items spawnen, wird in Schwierigkeit angepasst
+        Dim minWartezeit As Integer 'Definiert die schnellste Geschwindigkeit des Games
 
         'Startwerte basierend auf der Schwierigkeit setzen
         Select Case aktuelleSchwierigkeit
+
             Case Schwierigkeit.Leicht
                 leben = 7          ' Mehr Leben
-                Wartezeit = 250    ' Auto fährt langsamer am Anfang
                 a_max = 1.5        ' Weniger Gegner am Anfang
+                itemWarscheinlichkeit = 0.1 ' Chance auf Items
+                Wartezeit = 250    ' Auto fährt langsamer am Anfang
+                minWartezeit = 50
 
             Case Schwierigkeit.Mittel
                 leben = 5
-                Wartezeit = 200
                 a_max = A_MAX_START
+                itemWarscheinlichkeit = 0.08 ' Chance auf Items
+                Wartezeit = 200
+                minWartezeit = 40
 
             Case Schwierigkeit.Schwer
                 leben = 3          ' Weniger Leben
-                Wartezeit = 130    ' Autos sind verdammt schnell!
                 a_max = 3.0        ' Höhere Gegnerdichte von Beginn an
+                itemWarscheinlichkeit = 0.02 ' Geringere Chance auf Items
+                Wartezeit = 130    ' Autos sind verdammt schnell!
+                minWartezeit = 20
+
         End Select
 
         SpielfigurPos = SPALTE_MAX / 2
@@ -428,7 +438,7 @@ Module Module1
         'Hauptschleife des Spiels
         Do
             'neue Zeile erzeugen
-            ZeilenErzeugung(Zeile, a_max, idx, auto_schicht, autoInSpur, spawnCooldown)
+            ZeilenErzeugung(Zeile, a_max, idx, auto_schicht, autoInSpur, spawnCooldown, itemWarscheinlichkeit)
 
             'Auto Schicht um auto von hinten auszubenen, damit es von oben nach unten fährt (ohne dass out of array fehler erzeugt wird)
             auto_schicht = auto_schicht - 1
@@ -730,7 +740,7 @@ Module Module1
                 ' Warten (wird durch Speedboost beeinflusst)
                 If DateTime.Now < speedBoostBis Then
                     ' Halbe Wartezeit = Doppelte Geschwindigkeit!
-                    Threading.Thread.Sleep((Wartezeit / SPIELFIGUR) * 0.25)
+                    Threading.Thread.Sleep((Wartezeit / SPIELFIGUR) * 0.1)
                 Else
                     ' Normale Geschwindigkeit
                     Threading.Thread.Sleep(Wartezeit / SPIELFIGUR)
@@ -743,8 +753,10 @@ Module Module1
             Loop Until Taste = NO_KEY
 
             'Wartezeit verkürzen
-            If Wartezeit > 50 Then
+            If Wartezeit > minWartezeit Then
                 Wartezeit = Wartezeit * 0.99
+                Console.WriteLine("Neue Wartezeit: " & Wartezeit & " ")
+
             End If
             'Console.SetCursorPosition(15, ZEILE_MAX)
             'Console.Write("Wartezeit: " & Wartezeit)
@@ -1196,7 +1208,6 @@ Module Module1
 
 
             If aktion = Hauptmenü.Spielen Then
-
                 Console.Clear()
                 Spielablauf()
 
