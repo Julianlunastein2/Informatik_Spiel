@@ -47,6 +47,9 @@
   <PropertyGroup>
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>icons8-sportwagen-96.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -122,6 +125,7 @@
     <Content Include="Highway_to_hell.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="icons8-sportwagen-96.ico" />
     <Content Include="I_feel_good_%28vodka alternative%29.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
