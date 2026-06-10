@@ -415,7 +415,7 @@ Module Module1
                 a_max = 1.5        ' Weniger Gegner am Anfang
                 itemWarscheinlichkeit = 0.1 ' Chance auf Items
                 Wartezeit = 250    ' Auto fährt langsamer am Anfang
-                minWartezeit = 50
+                minWartezeit = 50  ' Maximaler Speed
 
             Case Schwierigkeit.Mittel
                 leben = 5
@@ -426,9 +426,9 @@ Module Module1
 
             Case Schwierigkeit.Schwer
                 leben = 3          ' Weniger Leben
-                a_max = 3.0        ' Höhere Gegnerdichte von Beginn an
+                a_max = 3.0
                 itemWarscheinlichkeit = 0.02 ' Geringere Chance auf Items
-                Wartezeit = 130    ' Autos sind verdammt schnell!
+                Wartezeit = 130
                 minWartezeit = 20
 
         End Select
