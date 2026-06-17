@@ -70,10 +70,6 @@ Module Module1
             Zeile(i) = " "
         Next
 
-        'zufälliges ermitteln der vaiabel x
-        Randomize()
-        X = VBMath.Rnd
-
         'A = (a_max - A_MIN) * X + A_MIN
         'Console.WriteLine(A)
 
@@ -107,13 +103,13 @@ Module Module1
                 End If
             End If
 
-            'Auto ausgeben wenn autoInSpur = true
+            'Überprüfen ob autoInSpur wahr ist, also ob ein Auto gespawned werden soll
             If autoInSpur(i) = True Then
 
-                P = 1 + (SPUR_BREITE * i)
+                P = 1 + (SPUR_BREITE * i) 'Anpassen um Auto mittig in der aktuellen Spur zu platzieren
 
                 'Autoförmige Hindernisse anhand des Auto-Arrays in den Zeilen, zwischen den Fahrbahnmakierungen ausgeben
-                If auto_schicht >= 0 Then
+                If auto_schicht >= 0 Then 'Überprüfen das auto_schicht größer als 0 ist => also ob, und welche Schicht des Autos gerade ausgegeben wird
 
                     For j = 0 To Auto(auto_schicht).Length - 1
                         Zeile(P + j) = Auto(auto_schicht)(j)
@@ -135,7 +131,6 @@ Module Module1
                     Randomize()
                     r = VBMath.Rnd
                     If r < 0.25 Then
-
                         Zeile(P) = "+" 'Extra Leben
                     ElseIf r < 0.5 Then
                         Zeile(P) = "B" 'Bier
@@ -148,39 +143,6 @@ Module Module1
             End If
 
         Next
-        Exit Sub
-
-        ''G = (G_Max - G_MIN) * X + G_MIN
-        ''console.WriteLine("G: " & G)
-
-        ''Startposition P des Hindernisblocks zufällig ermitteln
-        'Randomize()
-        'X = VBMath.Rnd
-
-        'P = (SPALTE_MAX - P_MIN) * X + P_MIN
-        ''Console.WriteLine("P: " & P)
-
-        ''Für jedes der G Einzelhindernisse:
-        'For j = 1 To G
-
-        '    'Prüfen ob Hinderniss innerhalb des Wertebereichs ist
-        '    If P + j - 1 <= SPALTE_MAX Then
-
-        '        'Hinderniss an Position P+j-1 in den Zeilenvektor eintragen
-
-
-        '    End If
-
-        'Next
-
-
-
-        ''Ausgabe zum Test
-        'For i = 0 To SPALTE_MAX
-        '    Console.Write(Zeile(i))
-        'Next
-        'Console.WriteLine()
-
 
     End Sub
 
@@ -856,7 +818,7 @@ Module Module1
             'Wartezeit verkürzen
             If Wartezeit > minWartezeit Then
                 Wartezeit = Wartezeit * 0.99
-                Console.WriteLine("Neue Wartezeit: " & Wartezeit & " ")
+                'Console.WriteLine("Neue Wartezeit: " & Wartezeit & " ") 'Nur für Testzwecke, um die Verkürzung zu sehen
 
             End If
             'Console.SetCursorPosition(15, ZEILE_MAX)
