@@ -65,50 +65,38 @@ Module Module1
 
 
 
-        'Zeilenvektor mit Leerzeichen füllen
+        'Zeilenvektor mit Leerzeichen vorbelegen
         For i = 0 To SPALTE_MAX
             Zeile(i) = " "
         Next
 
-        'Zeile vorher komplett füllen (verhidnert Fehler mit dem Rand
-        If idx = 1 OrElse idx = 2 Then
-            Zeile(SPALTE_MAX) = " "
-        End If
-
-        'Anzahl A der Hindernisblocks zufällig ermitteln
+        'zufälliges ermitteln der vaiabel x
         Randomize()
         X = VBMath.Rnd
 
         'A = (a_max - A_MIN) * X + A_MIN
         'Console.WriteLine(A)
 
-        'Für jeden der A Hindernisblocks:
-        For i = 0 To SPUREN_ANZAHL - 1 'Ändern zu SPUREN_ANZAHL, damit die Anzahl der Spuren variabel ist
+        'Generierung des Spielfeldes 
+        For i = 0 To SPUREN_ANZAHL - 1 'Anzahl der Spuren ist variabel 
 
             'Spuren Begrenzung einfügen, alle 3 zeilen kommt kein strich
 
             P = 0 + (SPUR_BREITE * i)
 
             If idx = 1 OrElse idx = 2 Then
-                Zeile(P) = "|"
+                Zeile(P) = "|" 'Spurenbegrenzung zeichnen
 
-            ElseIf idx = 0 Then
-                Zeile(P) = " "
+            Else
+                Zeile(P) = " " 'keine Spurenbegrenzung zeichnen
             End If
 
             'Console.WriteLine(idx)
 
             'Größe G des Hindernisblocks zufällig ermitteln
 
-            'Entscheiden ob ein neues Auto "gedruckt" wird anahnd auto_schicht, um Überlappung zu vermeiden und grafik fehler zu vermeiden
+            'Entscheiden ob ein neues Auto "gedruckt" wird anahnd auto_schicht, ist diese über 3 , um Überlappung zu vermeiden und grafik fehler zu vermeiden
             If auto_schicht = 3 Then
-
-                If spawnCooldown Then
-                    spawnCooldown = spawnCooldown - 1
-                    autoInSpur(i) = False
-
-                Else
-                End If
 
                 Randomize()
                 X = VBMath.Rnd
