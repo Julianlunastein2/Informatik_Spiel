@@ -224,7 +224,7 @@ Module Module1
         ' 2. LOGO ROT/WEISS UTZENTRIERT AUSGEBEN
         Dim breite As Integer = Console.WindowWidth
         Dim startZeile As Integer = 3
-        Dim GlockenMusik As New SoundPlayer("Glocke.wav")
+        Dim glockenMusik As New SoundPlayer("Glocke.wav")
 
         GlockenMusik.PlayLooping()
 
@@ -347,7 +347,7 @@ Module Module1
     Function Startmenü() As Hauptmenü
 
         Dim auswahl As Integer = 0
-        Dim optionen() As String = {"SPIEL STARTEN", "SCHWIERIGKEIT", "Spurenanzahl", "SCOREBOARD", "AUTO OPTIK", "ANLEITUNG", "SPIEL BEENDEN"}
+        Dim optionen() As String = {"SPIEL STARTEN", "SCHWIERIGKEIT", "SPURENZAHL", "SCOREBOARD", "AUTO OPTIK", "ANLEITUNG", "SPIEL BEENDEN"}
 
         ' Dein ASCII-Schriftzug zeilenweise im Array hinterlegt
         Dim logo() As String = {
