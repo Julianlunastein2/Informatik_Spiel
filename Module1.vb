@@ -347,7 +347,7 @@ Module Module1
     Function Startmenü() As Hauptmenü
 
         Dim auswahl As Integer = 0
-        Dim optionen() As String = {"SPIEL STARTEN", "SCHWIERIGKEIT", "SPURENZAHL", "SCOREBOARD", "AUTO OPTIK", "ANLEITUNG", "SPIEL BEENDEN"}
+        Dim optionen() As String = {"SPIEL STARTEN", "SCHWIERIGKEIT", "Spurenanzahl", "SCOREBOARD", "AUTO OPTIK", "ANLEITUNG", "SPIEL BEENDEN"}
 
         ' Dein ASCII-Schriftzug zeilenweise im Array hinterlegt
         Dim logo() As String = {
@@ -360,7 +360,7 @@ Module Module1
             " ░▒▓██████▓▒░░▒▓████████▓▒░▒▓█▓▒░▒▓███████▓▒░   ░▒▓█▓▒░   ░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░ "
         }
 
-        Dim credits As String = "by Noah, Jonas und Julian"
+        Dim credits As String = "Drunk edition! by Noah, Jonas und Julian"
 
         ' Da das Logo 152 Zeichen breit ist, passen wir das Konsolenfenster dynamisch an,
         ' damit es zu keinen unschönen Zeilenumbrüchen kommt.
