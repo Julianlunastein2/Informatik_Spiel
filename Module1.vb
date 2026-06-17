@@ -57,9 +57,6 @@ Module Module1
         Dim i As Integer
         Dim G As Integer    'Größe des Hindernisblocks
         Dim P As Integer    'Position des Hindernisblocks
-
-
-
         'Auto Abbildung
         Dim Auto As String() = {"   _____",'7
                                 "  /_..._\",'8
@@ -475,6 +472,7 @@ Module Module1
         Dim score As Integer = 0 'Unser Punktezähler
         Dim itemWarscheinlichkeit As Single 'Variable um die Warscheinlichkeit zu speichern, mit der Items spawnen, wird in Schwierigkeit angepasst
         Dim minWartezeit As Integer 'Definiert die schnellste Geschwindigkeit des Games
+
         '============================================================================================================================
         'Musikpause
         Dim musikpause As Integer = 0 'cooldown nachdem die Hintergrundmusik weiter abspielt
@@ -487,27 +485,28 @@ Module Module1
         Dim speedMusik As New SoundPlayer("Gonzales.wav")
 
         '============================================================================================================================
+
         'Startwerte basierend auf der Schwierigkeit setzen
         Select Case aktuelleSchwierigkeit
 
             Case Schwierigkeit.Leicht
-                leben = 7          ' Mehr Leben
-                a_max = A_MAX_START - 1  ' Weniger Gegner am Anfang
-                itemWarscheinlichkeit = 0.1 ' Chance auf Items
-                Wartezeit = 250    ' Auto fährt langsamer am Anfang
-                minWartezeit = 30  ' Maximaler Speed
+                leben = 7          'Mehr Leben
+                a_max = A_MAX_START - 1  'Weniger Gegner am Anfang
+                itemWarscheinlichkeit = 0.1 'Chance auf Items
+                Wartezeit = 250    'Auto fährt langsamer am Anfang
+                minWartezeit = 30  'Maximaler Speed
 
             Case Schwierigkeit.Mittel
                 leben = 5
                 a_max = A_MAX_START
-                itemWarscheinlichkeit = 0.08 ' Chance auf Items
+                itemWarscheinlichkeit = 0.08 'Chance auf Items
                 Wartezeit = 200
                 minWartezeit = 20
 
             Case Schwierigkeit.Schwer
-                leben = 3          ' Weniger Leben
+                leben = 3          'Weniger Leben
                 a_max = A_MAX_START + 2
-                itemWarscheinlichkeit = 0.02 ' Geringere Chance auf Items
+                itemWarscheinlichkeit = 0.02 'Geringere Chance auf Items
                 Wartezeit = 130
                 minWartezeit = 1
 
@@ -517,7 +516,7 @@ Module Module1
 
         For z = 0 To ZEILE_MAX
             For s = 0 To SPALTE_MAX
-                ' Standardmäßig überall Leerzeichen setzen um Generierung des Randes nicht zu unterbrechen
+                'Standardmäßig überall Leerzeichen setzen um Generierung des Randes nicht zu zerfetzen
                 spielfeld(z, s) = " "
             Next
         Next
@@ -553,22 +552,22 @@ Module Module1
                 spielfeld(0, s) = Zeile(s)
             Next
 
-            ' --- SPIELFELD MIT RAHMEN ZEICHNEN (VORDERGRUND-EFFEKTE) ---
+            'Spielfeld mit Ramen zeichnen
             Console.SetCursorPosition(0, 0)
             Console.BackgroundColor = ConsoleColor.Black ' Hintergrund bleibt immer sauber schwarz
 
-            ' Globale Textfarbe basierend auf aktiven Effekten/Items bestimmen
+            'Textfarbe basierend auf aktiven Effekten/Items bestimmen
             Dim effektFarbe As ConsoleColor = ConsoleColor.White
 
             If DateTime.Now < unverwundbar Then
-                effektFarbe = ConsoleColor.Yellow       ' Gelber Text bei Stern (Unverwundbar)
+                effektFarbe = ConsoleColor.Yellow       'Gelber Text bei Stern (Unverwundbar)
             ElseIf DateTime.Now < bierEffektBis Then
-                effektFarbe = ConsoleColor.Green        ' Grüner Text bei Bier (Betrunken)
+                effektFarbe = ConsoleColor.Green        'Grüner Text bei Bier (Betrunken)
             ElseIf DateTime.Now < speedBoostBis Then
-                effektFarbe = ConsoleColor.Cyan         ' Cyanfarbener Text bei Speed-Boost
+                effektFarbe = ConsoleColor.Cyan         'Cyanfarbener Text bei Speed-Boost
             End If
 
-            ' 1. Oberer Rahmen (Leuchtet in der Effektfarbe, wenn einer aktiv ist, sonst Cyan)
+            'Oberer Rahmen
             If effektFarbe <> ConsoleColor.White Then
                 Console.ForegroundColor = effektFarbe
             Else
@@ -577,7 +576,7 @@ Module Module1
             Console.Write("╔" & New String("═", SPALTE_MAX + 1) & "╗")
             Console.WriteLine()
 
-            ' 2. Spielfeld-Inhalt mit Seitenrändern
+            'Spielfeld-Inhalt mit Seitenrändern
             For z = 0 To ZEILE_MAX - 2
                 ' Linker Rahmen
                 If effektFarbe <> ConsoleColor.White Then
@@ -589,20 +588,20 @@ Module Module1
 
                 'Inhalt zeichnen
                 For s = 0 To SPALTE_MAX
-                    ' Wenn kein globaler Statuseffekt aktiv ist, bekommen Symbole ihre eigene Farbe
+                    'Wenn kein globaler Statuseffekt aktiv ist, bekommen Symbole ihre eigene Farbe
                     If effektFarbe = ConsoleColor.White Then
                         Select Case spielfeld(z, s)
                             Case "|" : Console.ForegroundColor = ConsoleColor.DarkGray
-                            Case "+" : Console.ForegroundColor = ConsoleColor.Red         ' Herz = Rot
-                            Case "B" : Console.ForegroundColor = ConsoleColor.DarkGreen   ' Bier = Grün
-                            Case "*" : Console.ForegroundColor = ConsoleColor.Yellow      ' Stern = Gelb
-                            Case "S" : Console.ForegroundColor = ConsoleColor.Cyan        ' Speed = Blau
+                            Case "+" : Console.ForegroundColor = ConsoleColor.Red         'Herz = Rot
+                            Case "B" : Console.ForegroundColor = ConsoleColor.DarkGreen   'Bier = Grün
+                            Case "*" : Console.ForegroundColor = ConsoleColor.Yellow      'Stern = Gelb
+                            Case "S" : Console.ForegroundColor = ConsoleColor.Cyan        'Speed = Blau
                             Case " " : Console.ForegroundColor = ConsoleColor.White
                             Case Else : Console.ForegroundColor = ConsoleColor.Gray
                                 ' Gegner-Autos
                         End Select
                     Else
-                        ' Wenn ein Statuseffekt aktiv ist, blinkt/leuchtet alles in dieser Farbe
+                        'Wenn ein Statuseffekt aktiv ist leuchtet alles in dieser Farbe
                         If spielfeld(z, s) = "|" Then
                             Console.ForegroundColor = ConsoleColor.DarkGray
                         Else
@@ -613,7 +612,7 @@ Module Module1
                     Console.Write(spielfeld(z, s))
                 Next
 
-                ' Rechter Rahmen
+                'Rechter Rahmen
                 If effektFarbe <> ConsoleColor.White Then
                     Console.ForegroundColor = effektFarbe
                 Else
@@ -622,7 +621,7 @@ Module Module1
                 Console.WriteLine("║")
             Next
 
-            ' 3. Unterer Rahmen
+            'Unterer Rahmen
             If effektFarbe <> ConsoleColor.White Then
                 Console.ForegroundColor = effektFarbe
             Else
@@ -631,9 +630,8 @@ Module Module1
             Console.Write("╚" & New String("═", SPALTE_MAX + 1) & "╝")
             Console.WriteLine()
 
-            ' Farbe für den nachfolgenden Code zurücksetzen
+            'Farbe für den nachfolgenden Code zurücksetzen
             Console.ForegroundColor = ConsoleColor.White
-            ' -----------------------------------------------------------
 
             For i = 1 To SPIELFIGUR
 
@@ -670,18 +668,18 @@ Module Module1
                     Console.Write("         ")
                 Next
 
-                ' Position der Spielfigur ermitteln (mit Bier-Effekt-Prüfung)
+                'Position der Spielfigur ermitteln (mit Bier-Effekt-Prüfung)
                 If DateTime.Now < bierEffektBis Then
-                    ' EFFEKT AKTIV: Steuerbefehle sind vertauscht!
+                    'EFFEKT AKTIV: Steuerbefehle sind vertauscht!
                     If Taste = CURSOR_LEFT Then
-                        SpielfigurPos += 1 ' Eigentlich links gedrückt, aber Auto fährt nach RECHTS
+                        SpielfigurPos += 1 'Eigentlich links gedrückt, aber Auto fährt nach RECHTS
                     End If
 
                     If Taste = CURSOR_RIGHT Then
-                        SpielfigurPos -= 1 ' Eigentlich rechts gedrückt, aber Auto fährt nach LINKS
+                        SpielfigurPos -= 1 'Eigentlich rechts gedrückt, aber Auto fährt nach LINKS
                     End If
                 Else
-                    ' NORMALER ZUSTAND: Alles wie gewohnt
+                    'Kein Effekt: Normale Steuerung
                     If Taste = CURSOR_LEFT Then
                         SpielfigurPos -= 1
                     End If
