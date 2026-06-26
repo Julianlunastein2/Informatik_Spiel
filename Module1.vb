@@ -920,7 +920,7 @@ Module Module1
             Console.WriteLine("=====================================")
             Console.WriteLine()
 
-            ' Textfarbe auf Orange für die aktive Auswahl setzen, danach wieder auf Weiß
+            'Textfarbe auf Orange für die aktive Auswahl setzen, danach wieder auf Weiß
             If aktuelleSchwierigkeit = Schwierigkeit.Leicht Then
                 Console.ForegroundColor = ConsoleColor.DarkYellow
                 Console.Write(" > [ LEICHT ] <")
@@ -945,7 +945,7 @@ Module Module1
             Console.WriteLine(" Aktuelle Einstellungen dieses Modus:")
             Console.ForegroundColor = ConsoleColor.White
 
-            ' Dynamische Anzeige der Parameter passend zur ausgewählten Schwierigkeit
+            'Dynamische Anzeige der Parameter passend zur ausgewählten Schwierigkeit
             Select Case aktuelleSchwierigkeit
                 Case Schwierigkeit.Leicht
                     Console.WriteLine("  • Start-Leben:           7")
@@ -973,7 +973,7 @@ Module Module1
 
             taste = Console.ReadKey(True).Key
 
-            ' Auswahl per Pfeiltasten
+            'Auswahl per Pfeiltasten
             If taste = ConsoleKey.LeftArrow Then
                 If aktuelleSchwierigkeit = Schwierigkeit.Schwer Then
                     aktuelleSchwierigkeit = Schwierigkeit.Mittel
@@ -998,7 +998,7 @@ Module Module1
     End Sub
 
     '=========================================================================================================================
-    ' Sub um die Anzahl der Spuren im Spiel anzupassen
+    'Sub um die Anzahl der Spuren im Spiel anzupassen
     '=========================================================================================================================
     Sub SpurenAnpassen()
         Dim taste As ConsoleKey
@@ -1050,15 +1050,15 @@ Module Module1
     Sub ScoreboardSpeichern(ByVal dateiName As String, ByVal spielerName As String, ByVal score As Integer)
         Dim eintraege As New List(Of String)()
 
-        ' 1. Bestehende Einträge laden, falls die Datei schon existiert
+        'Bestehende Einträge laden, falls die Datei schon existiert
         If File.Exists(dateiName) Then
             eintraege.AddRange(File.ReadAllLines(dateiName))
         End If
 
-        ' 2. Neuen Eintrag im Format "Name - Punkte" hinzufügen
+        'Neuen Eintrag im Format "Name - Punkte" hinzufügen
         eintraege.Add(spielerName & " - " & score)
 
-        ' 3. Nach Punkten sortieren (Absteigend) und nur die besten 10 behalten
+        'Nach Punkten sortieren (Absteigend) und nur die besten 10 behalten
         Dim sortierteTop10 = eintraege.
             OrderByDescending(Function(zeile)
                                   Dim teile = zeile.Split(New String() {" - "}, StringSplitOptions.None)
@@ -1074,7 +1074,7 @@ Module Module1
     End Sub
 
     '=========================================================================================================================
-    ' Sub zur Auswahl der Autofarbe im Hauptmenü (!Von KI erstellt!)
+    'Sub zur Auswahl der Autofarbe im Hauptmenü (!Von KI erstellt!)
     '=========================================================================================================================
     Sub AutoOptikAnpassen()
         Dim farben() As ConsoleColor = {ConsoleColor.White, ConsoleColor.Red, ConsoleColor.Blue, ConsoleColor.Green, ConsoleColor.Yellow, ConsoleColor.Magenta}
