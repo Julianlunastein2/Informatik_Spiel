@@ -865,7 +865,7 @@ Module Module1
             'Console.Write("Wartezeit: " & Wartezeit)
 
             'Hindernissdichte erhöhen
-            If a_max < 10 Then
+            If a_max < 12 Then
                 a_max = a_max * 1.01
             End If
 
