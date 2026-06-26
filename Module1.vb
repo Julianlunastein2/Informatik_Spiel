@@ -470,9 +470,9 @@ Module Module1
                 minWartezeit = 20
 
             Case Schwierigkeit.Schwer
-                leben = 3          'Weniger Leben
+                leben = 3                     'Weniger Leben
                 a_max = A_MAX_START + 2
-                itemWarscheinlichkeit = 0.02 'Geringere Chance auf Items
+                itemWarscheinlichkeit = 0.02  'Geringere Chance auf Items
                 Wartezeit = 130
                 minWartezeit = 1
 
@@ -481,7 +481,7 @@ Module Module1
         SpielfigurPos = SPALTE_MAX / 2
 
         SpielfigurZeile = ZEILE_MAX - 1
-
+        'Füllung des Spielfelds mit Leerzeichen, damit die Ränder nicht zerschnitten werden
         For z = 0 To ZEILE_MAX
             For s = 0 To SPALTE_MAX
                 'Standardmäßig überall Leerzeichen setzen um Generierung des Randes nicht zu zerfetzen
@@ -489,6 +489,7 @@ Module Module1
             Next
         Next
 
+        'Starte Musik im Hintergrund
         'Starke Musik im Hintergrund
         hintergrunMusik.PlayLooping()
 
@@ -507,7 +508,7 @@ Module Module1
 
             'Alle Zeilen des Spielfelds um eine Zeile nach unten verschieben
             'Rückwärtschleife über zeilen
-            For z = ZEILE_MAX To 1 Step -1
+            For z = ZEILE_MAX To 1 Step -1 'Step -1 Vorschlag der KI
                 'Vorwärtschleife über Spalten
                 For s = 0 To SPALTE_MAX
                     'Eine Zelle nach unten kopieren
