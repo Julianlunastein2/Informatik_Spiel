@@ -9,7 +9,7 @@ Imports System.Media
 '                        Erstellung des Pausenmenüs
 '                        Debugging bei auftretenden Fehlern --> Fehlersuche
 '                        Erstellung der Spielerauto Farbeinstellungen
-'                        Finale Überprüfung der Kommentare und der Codequalität
+'                        Finale Überprüfung und teilweise Erstellung der Kommentare und der Codequalität
 '===================================================================================================================================================================================================
 
 Module Module1
