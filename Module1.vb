@@ -888,9 +888,6 @@ Module Module1
                 End If
             End If
 
-            ' Das bestehende Sleep deines Spiels sorgt für die Verzögerung
-
-
         Loop Until leben <= 0
 
         'Hintergrundmusik bei "Tod" stoppen
@@ -906,17 +903,11 @@ Module Module1
 
         Gameover(score)
 
-
-
-
     End Sub
+
 
     '=========================================================================================================================
     'Sub der die Schwierigkeit des Spiels anpasst
-    '=========================================================================================================================
-
-    '=========================================================================================================================
-    'Sub der die Schwierigkeit des Spiels anpasst (inklusive Anzeige der jeweiligen Einstellungen)
     '=========================================================================================================================
     Sub SchwierigkeitAnpassen()
         Dim taste As ConsoleKey
