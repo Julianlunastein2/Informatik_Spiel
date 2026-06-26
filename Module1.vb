@@ -2,6 +2,15 @@
 Imports System.Threading
 Imports System.Media
 
+'===================================================================================================================================================================================================
+'Noah, Jonas und Julian
+'Der großteil dieses Programms wurde ohne Künstliche Intelligenz erstellt,
+'Hier wurde KI benutzt:  Layout des Gameover Screens (Mittig platziert etc.)
+'                        Erstellung des Pausenmenüs
+'                        Debugging bei auftretenden Fehlern --> Fehlersuche
+'                        Erstellung der Spielerauto Farbeinstellungen
+'                        Finale Überprüfung der Kommentare und der Codequalität
+'===================================================================================================================================================================================================
 
 Module Module1
 
@@ -867,7 +876,7 @@ Module Module1
             End If
 
             '==========================================
-            'AUTOMATISCHER MUSIK-NEUSTART NACH ITEMS
+            'automatischer Musikpause-Cooldown, damit sich die Sounds nicht überlappen
             '==========================================
             If musikpause > 0 Then
                 musikpause -= 1 ' Zähler runterzählen
@@ -1073,7 +1082,7 @@ Module Module1
     End Sub
 
     '=========================================================================================================================
-    ' Sub zur Auswahl der Autofarbe im Hauptmenü
+    ' Sub zur Auswahl der Autofarbe im Hauptmenü (!Von KI erstellt!)
     '=========================================================================================================================
     Sub AutoOptikAnpassen()
         Dim farben() As ConsoleColor = {ConsoleColor.White, ConsoleColor.Red, ConsoleColor.Blue, ConsoleColor.Green, ConsoleColor.Yellow, ConsoleColor.Magenta}
@@ -1176,7 +1185,7 @@ Module Module1
                     Console.Write($"{i + 1}. {leicht(i)}")
                 End If
 
-                ' Spalte 2: Mittel
+                ' Splte 2: Mittel
                 If i < mittel.Length Then
                     Console.SetCursorPosition(32, startZeile)
                     Console.Write($"{i + 1}. {mittel(i)}")
@@ -1190,7 +1199,7 @@ Module Module1
             Next
         End If
 
-        ' Fußzeile ausgeben
+        'Fußzeile ausgeben
         Console.ForegroundColor = ConsoleColor.Cyan
         Console.SetCursorPosition(0, 8 + Math.Min(maxEintraege, 10))
         Console.WriteLine("=========================================================================================")
