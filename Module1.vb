@@ -8,6 +8,8 @@ Module Module1
     Const NO_KEY = 0
     Const CURSOR_LEFT = 1
     Const CURSOR_RIGHT = 2
+    Const CURSOR_UP = 4
+    Const CURSOR_DOWN = 5
     Const SPACE_BAR = 3
     Const UNKNOWN_KEY = 99
     '============================================================================================
@@ -35,6 +37,10 @@ Module Module1
                 Return CURSOR_LEFT
             ElseIf cki.Key = ConsoleKey.RightArrow Then
                 Return CURSOR_RIGHT
+            ElseIf cki.Key = ConsoleKey.UpArrow Then
+                Return CURSOR_UP
+            ElseIf cki.Key = ConsoleKey.DownArrow Then
+                Return CURSOR_DOWN
             ElseIf cki.Key = ConsoleKey.Spacebar Then
                 Return SPACE_BAR
             Else
@@ -154,7 +160,7 @@ Module Module1
         Console.BackgroundColor = ConsoleColor.Black
         Console.Clear()
 
-        ' ASCII-Logo in ein Array packen für saubere Zentrierung
+        'ASCII-Logo in ein Array packen für saubere Zentrierung
         Dim goLogo() As String = {
             " ▄████  ▄▄▄       ███▄ ▄███▓▓█████      ▒█████   ██▒   █▓▓█████  ██▀███  ",
             "██▒ ▀█▒▒████▄    ▓██▒▀█▀ ██▒▓█   ▀     ▒██▒  ██▒▓██░   █▒▓█   ▀ ▓██ ▒ ██▒",
@@ -168,7 +174,7 @@ Module Module1
             "                                                      ░                   "
         }
 
-        ' 2. LOGO ROT/WEISS UTZENTRIERT AUSGEBEN
+        'Logo zentriert anzeigen
         Dim breite As Integer = Console.WindowWidth
         Dim startZeile As Integer = 3
         Dim glockenMusik As New SoundPlayer("Glocke.wav")
@@ -180,7 +186,7 @@ Module Module1
             If xPos < 0 Then xPos = 0
             Console.SetCursorPosition(xPos, startZeile + i)
 
-            ' Wechselnde Farben für den "Blut/Glut"-Effekt im Text
+            'Wechselnde Farben für den "Blut/Glut"-Effekt im Text
             If i < 5 Then
                 Console.ForegroundColor = ConsoleColor.DarkRed
             Else
@@ -189,7 +195,7 @@ Module Module1
             Console.Write(goLogo(i))
         Next
 
-        ' 3. STATISTIK-BOX ENTWERFEN
+        'Ausgabe der Schwierigkeit und des Scores in einer Box -> Mit hilfe von Künstlicher Intelligenz für saubere Zentrierung und Optik
         Console.ForegroundColor = ConsoleColor.White
         Dim boxZeile As Integer = startZeile + goLogo.Length + 2
 
@@ -200,7 +206,7 @@ Module Module1
             Case Schwierigkeit.Schwer : diffText = "SCHWER"
         End Select
 
-        ' Box zentrieren
+        'Box zentrieren
         Dim boxBreite As Integer = 42
         Dim xBox As Integer = (breite - boxBreite) / 2
         If xBox < 0 Then xBox = 0
@@ -224,7 +230,7 @@ Module Module1
 
         Console.WriteLine()
 
-        ' 4. NAMENSABFRAGE
+        'Namen für Highscore-Tabelle abfragen
         Console.ForegroundColor = ConsoleColor.Cyan
         Dim frageText As String = "            Gib deinen Namen für die Highscore-Tabelle ein: "
         Dim xFrage As Integer = (breite - frageText.Length - 15) / 2
@@ -237,7 +243,7 @@ Module Module1
         Dim name As String = Console.ReadLine()
         If String.IsNullOrWhiteSpace(name) Then name = "Unbekannt"
 
-        ' Passende Datei anhand der aktuellen Schwierigkeit wählen
+        'Passende Datei anhand der aktuellen Schwierigkeit wählen
         Dim dateiName As String = ""
         Select Case aktuelleSchwierigkeit
             Case Schwierigkeit.Leicht : dateiName = "highscores_leicht.txt"
@@ -248,7 +254,7 @@ Module Module1
         'Scoreboard füttern
         ScoreboardSpeichern(dateiName, name, finalScore)
 
-        '5. ERFOLGSMELDUNG
+        'Erfolgsmeldung zentriert ausgeben
         Console.WriteLine()
         Console.ForegroundColor = ConsoleColor.Green
         Dim erfolgText As String = "Score erfolgreich gespeichert! [Drücke Enter]"
@@ -408,7 +414,8 @@ Module Module1
         Dim z As Integer
         Dim s As Integer
         Dim Taste As Integer
-        Dim SpielfigurPos As Integer
+        Dim SpielfigurPos As Integer 'Position der Spielfigur in der Spalte
+        Dim SpielfigurZeile As Integer = ZEILE_MAX - 1 'Zeile der Spielfigur
         Dim i As Integer
         Dim Wartezeit As Single
         Dim a_max As Single
@@ -463,6 +470,8 @@ Module Module1
         End Select
 
         SpielfigurPos = SPALTE_MAX / 2
+
+        SpielfigurZeile = ZEILE_MAX - 1
 
         For z = 0 To ZEILE_MAX
             For s = 0 To SPALTE_MAX
@@ -614,7 +623,7 @@ Module Module1
 
                 'Spielfigur an alter Position löschen
                 For h As Integer = 1 To 4
-                    Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - h)
+                    Console.SetCursorPosition(SpielfigurPos + 1, SpielfigurZeile - h)
                     Console.Write("         ")
                 Next
 
@@ -628,6 +637,15 @@ Module Module1
                     If Taste = CURSOR_RIGHT Then
                         SpielfigurPos -= 1 'Eigentlich rechts gedrückt, aber Auto fährt nach LINKS
                     End If
+
+                    If Taste = CURSOR_UP Then
+                        SpielfigurZeile -= 1
+                    End If
+
+                    If Taste = CURSOR_DOWN Then
+                        SpielfigurZeile += 1
+                    End If
+
                 Else
                     'Kein Effekt: Normale Steuerung
                     If Taste = CURSOR_LEFT Then
@@ -637,11 +655,23 @@ Module Module1
                     If Taste = CURSOR_RIGHT Then
                         SpielfigurPos += 1
                     End If
+
+                    If Taste = CURSOR_UP Then
+                        SpielfigurZeile -= 1
+                    End If
+
+                    If Taste = CURSOR_DOWN Then
+                        SpielfigurZeile += 1
+                    End If
                 End If
 
                 'Begrenzung der Spielfigur auf dem Spielfeld
                 If SpielfigurPos < 0 Then
                     SpielfigurPos = 0
+                ElseIf SpielfigurZeile < 6 Then
+                    SpielfigurZeile = 6
+                ElseIf SpielfigurZeile > ZEILE_MAX - 1 Then
+                    SpielfigurZeile = ZEILE_MAX - 1
                 End If
 
                 'If SpielfigurPos > SPALTE_MAX Then
@@ -662,7 +692,7 @@ Module Module1
                 'Items und Effekte
                 For f As Integer = 1 To 4
                     For h As Integer = 1 To 8
-                        Dim symbol As Char = spielfeld(ZEILE_MAX - f, SpielfigurPos + h)
+                        Dim symbol As Char = spielfeld(SpielfigurZeile - f, SpielfigurPos + h)
 
                         If symbol = " " Or symbol = "|" Or symbol = Chr(0) Then
                             'Keine Kollision, weitergehen
@@ -670,7 +700,7 @@ Module Module1
                         ElseIf symbol = "+" Then
                             extraLebenMusik.Play() 'Soundeffekt für Extra Leben
                             leben = leben + 1
-                            spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
+                            spielfeld(SpielfigurZeile - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
 
                             musikpause = 7 'Kurze Musikpause, damit sich die Sounds nicht überlappen
 
@@ -680,7 +710,7 @@ Module Module1
                                 'Bier -> Item 3 (Kontrollen vertauscht)
                                 bierMusik.Play() 'Soundeffekt für Bier
                                 bierEffektBis = DateTime.Now.AddSeconds(15) ' Effekt für 15 Sekunden aktivieren
-                                spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
+                                spielfeld(SpielfigurZeile - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
 
                                 musikpause = 4 'Kurze Musikpause, damit sich die Sounds nicht überlappen
 
@@ -692,7 +722,7 @@ Module Module1
                                 'Stern -> Unverwundbarkeit (Item 1)
                                 sternMusik.Play() 'Soundeffekt für Stern
                                 unverwundbar = DateTime.Now.AddSeconds(10)
-                                spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
+                                spielfeld(SpielfigurZeile - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
 
                                 musikpause = 4 'Kurze Musikpause, damit sich die Sounds nicht überlappen
 
@@ -704,7 +734,7 @@ Module Module1
                                 'Speed Boost -> Item 2
                                 speedMusik.Play() 'Soundeffekt für Speed Boost
                                 speedBoostBis = DateTime.Now.AddSeconds(10)
-                                spielfeld(ZEILE_MAX - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
+                                spielfeld(SpielfigurZeile - f, SpielfigurPos + h) = " " ' Item auf dem Feld löschen
 
                                 musikpause = 4 'Kurze Musikpause, damit sich die Sounds nicht überlappen
                             End If
@@ -729,11 +759,11 @@ Module Module1
                         ' Wenn sich die Spielfigur (Breite 8) im Bereich dieser Spur befindet
                         If (SpielfigurPos + 8 >= spurStart) AndAlso (SpielfigurPos <= spurEnde) Then
 
-                            ' Lösche die betroffene Spur im unteren Bereich (die untersten 8 Zeilen) komplett.
-                            For z_del As Integer = 1 To 12
+                            ' Lösche die betroffene Spur im Bereich 4 überm Auto komplett.
+                            For z_del As Integer = 1 To 4
                                 For s_del As Integer = spurStart To spurStart + 9
                                     If s_del <= SPALTE_MAX Then
-                                        spielfeld(ZEILE_MAX - z_del, s_del) = " "
+                                        spielfeld(SpielfigurZeile - z_del, s_del) = " "
                                     End If
                                 Next
                             Next
@@ -758,17 +788,17 @@ Module Module1
                     End If
                 End If
 
-                'Spielfigur auf der Konsole ausgeben (mit Farbe)
+                'Spielfigur auf der Konsole generieren (mit Farbe)
 
                 Console.ForegroundColor = gewaehlteAutoFarbe
 
-                Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 1)
+                Console.SetCursorPosition(SpielfigurPos + 2, SpielfigurZeile - 1)
                 Console.Write("`'   `'")
-                Console.SetCursorPosition(SpielfigurPos + 1, ZEILE_MAX - 2)
+                Console.SetCursorPosition(SpielfigurPos + 1, SpielfigurZeile - 2)
                 Console.Write("(0[###]0)")
-                Console.SetCursorPosition(SpielfigurPos + 2, ZEILE_MAX - 3)
+                Console.SetCursorPosition(SpielfigurPos + 2, SpielfigurZeile - 3)
                 Console.Write("/_..._\")
-                Console.SetCursorPosition(SpielfigurPos + 3, ZEILE_MAX - 4)
+                Console.SetCursorPosition(SpielfigurPos + 3, SpielfigurZeile - 4)
                 Console.Write("_____")
 
                 Console.ForegroundColor = ConsoleColor.White
