@@ -1044,7 +1044,7 @@ Module Module1
     End Sub
 
     '=========================================================================================================================
-    ' Scoreboard-Logik: Laden, Speichern (nach Punkten sortiert) und Anzeigen (3 Spalten nebeneinander)
+    'Scoreboard-Logik: Laden, Speichern (nach Punkten sortiert) und Anzeigen (3 Spalten nebeneinander)
     '=========================================================================================================================
 
     Sub ScoreboardSpeichern(ByVal dateiName As String, ByVal spielerName As String, ByVal score As Integer)
@@ -1069,7 +1069,7 @@ Module Module1
             Take(10).
             ToList()
 
-        ' 4. Die saubere Top 10 zurück in die Datei schreiben
+        'Die saubere Top 10 zurück in die Datei schreiben
         File.WriteAllLines(dateiName, sortierteTop10)
     End Sub
 
