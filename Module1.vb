@@ -746,24 +746,24 @@ Module Module1
                     Next
                 Next
 
-                ' =========================================================================================
-                ' Spurbasierte Löschung bei Crash (erwischt Autos oben drüber, links & rechts)
-                ' =========================================================================================
+                '=========================================================================================
+                'Spurbasierte Löschung bei Crash (erwischt Autos oben drüber, unten drunter, links & rechts)
+                '=========================================================================================
                 If kollisionErkannt Then
 
-                    ' prüfen, welche der x Spuren (0 bis SPUREN_ANZAHL - 1) die Spielfigur gerade berührt
+                    'prüfen, welche der x Spuren (0 bis SPUREN_ANZAHL - 1) die Spielfigur gerade berührt
                     For i_spur As Integer = 0 To SPUREN_ANZAHL - 1
                         Dim spurStart As Integer = 1 + (SPUR_BREITE * i_spur)
-                        Dim spurEnde As Integer = spurStart + SPUR_BREITE - 2 ' Ein Auto ist ca. 8-9 Zeichen breit
+                        Dim spurEnde As Integer = spurStart + SPUR_BREITE - 2 'Ein Auto ist 8 Zeichen breit
 
-                        ' Wenn sich die Spielfigur (Breite 8) im Bereich dieser Spur befindet
+                        'Wenn sich die Spielfigur (Breite 8) im Bereich dieser Spur befindet
                         If (SpielfigurPos + 8 >= spurStart) AndAlso (SpielfigurPos <= spurEnde) Then
 
-                            ' Lösche die betroffene Spur im Bereich 4 überm Auto komplett.
-                            For z_del As Integer = 1 To 4
+                            'Lösche die betroffene alle Gegner in dieser Spur
+                            For z_del As Integer = 1 To ZEILE_MAX
                                 For s_del As Integer = spurStart To spurStart + 9
                                     If s_del <= SPALTE_MAX Then
-                                        spielfeld(SpielfigurZeile - z_del, s_del) = " "
+                                        spielfeld(ZEILE_MAX - z_del, s_del) = " "
                                     End If
                                 Next
                             Next
